@@ -22,6 +22,8 @@ export const metadata: Metadata = {
     "A sales outreach machine that replaces n8n lead scraping and enrichment flows with a real dashboard.",
 };
 
+export const dynamic = "force-dynamic";
+
 const rootClassName = `${spaceGrotesk.variable} ${plexMono.variable} h-full antialiased`;
 
 const bodyClassName =

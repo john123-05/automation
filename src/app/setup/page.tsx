@@ -9,6 +9,8 @@ export const metadata = {
     "Local setup vault for rotating API keys, billing credentials, Supabase storage, and Gmail OAuth without hand-editing environment files.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function SetupPage() {
   const env = getEnv();
   const sections = getSetupVaultSectionsState({
