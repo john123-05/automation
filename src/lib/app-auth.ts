@@ -44,8 +44,12 @@ export async function hasAppAccess() {
     return true;
   }
 
-  const cookieStore = await cookies();
-  const actualCookieValue = cookieStore.get(appAccessSessionCookieName)?.value;
+  try {
+    const cookieStore = await cookies();
+    const actualCookieValue = cookieStore.get(appAccessSessionCookieName)?.value;
 
-  return actualCookieValue === expectedCookieValue;
+    return actualCookieValue === expectedCookieValue;
+  } catch {
+    return false;
+  }
 }

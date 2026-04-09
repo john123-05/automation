@@ -10,12 +10,21 @@ export async function getUiSettings(): Promise<{
   language: UiLanguage;
   theme: UiTheme;
 }> {
-  const cookieStore = await cookies();
-  const language: UiLanguage =
-    cookieStore.get(uiLanguageCookieName)?.value === "de" ? "de" : "en";
-  const theme: UiTheme = cookieStore.get(uiThemeCookieName)?.value === "dark" ? "dark" : "light";
+  try {
+    const cookieStore = await cookies();
+    const language: UiLanguage =
+      cookieStore.get(uiLanguageCookieName)?.value === "de" ? "de" : "en";
+    const theme: UiTheme =
+      cookieStore.get(uiThemeCookieName)?.value === "dark" ? "dark" : "light";
 
-  return { language, theme };
+    return { language, theme };
+  } catch {
+    // Some hosted dev environments fail to initialize Next's request store reliably.
+    return {
+      language: "en",
+      theme: "light",
+    };
+  }
 }
 
 export function getUiSettingsCookieOptions() {
