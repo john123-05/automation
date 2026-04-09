@@ -14,6 +14,7 @@ import { UniversalSearchLauncher } from "@/components/universal-search-launcher"
 import { requireAppAccess } from "@/lib/app-auth";
 import { t } from "@/lib/copy";
 import { listWarmupAccounts } from "@/lib/email-warmup-server";
+import { normalizeEnvValue } from "@/lib/env-shared";
 import { getProviderStatuses, getStorageMode } from "@/lib/env";
 import { getDashboardSnapshot } from "@/lib/sales-machine/store";
 import { probeSupabaseTable, salesMachineTables } from "@/lib/sales-machine/supabase";
@@ -308,7 +309,7 @@ export default async function Home() {
   const trialCreditsCard = snapshot.billingOverview.cards.find((card) => card.id === "trial-credits");
   const openAiCard = snapshot.billingOverview.cards.find((card) => card.id === "openai");
 
-  if (process.env.VERCEL && !process.env.APP_ACCESS_PASSWORD?.trim()) {
+  if (process.env.VERCEL && !normalizeEnvValue(process.env.APP_ACCESS_PASSWORD)) {
     notices.push({
       id: "app-auth-missing",
       title: "Website is currently public",

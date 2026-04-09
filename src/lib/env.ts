@@ -1,10 +1,15 @@
 import type { ProviderStatus } from "@/lib/sales-machine/types";
+import { normalizeEnvValue } from "@/lib/env-shared";
 import { readSetupVaultSync } from "@/lib/setup-vault";
 
 export function getEnv() {
   const setupVault = readSetupVaultSync();
   const pick = (key: keyof typeof setupVault, fallback?: string | null) =>
-    setupVault[key]?.trim() || fallback?.trim() || null;
+    normalizeEnvValue(setupVault[key]) || normalizeEnvValue(fallback);
+  const inboxAutoSyncEnabled = normalizeEnvValue(process.env.INBOX_AUTO_SYNC_ENABLED);
+  const inboxPollIntervalSeconds = normalizeEnvValue(
+    process.env.INBOX_POLL_INTERVAL_SECONDS,
+  );
 
   return {
     googleMapsApiKey: pick("GOOGLE_MAPS_API_KEY", process.env.GOOGLE_MAPS_API_KEY),
@@ -51,7 +56,8 @@ export function getEnv() {
       process.env.GCP_BILLING_MANUAL_REMAINING_CREDIT,
     ),
     gcpTrialStartDate: pick("GCP_TRIAL_START_DATE", process.env.GCP_TRIAL_START_DATE),
-    gcpTrialLengthDays: Number.parseInt(process.env.GCP_TRIAL_LENGTH_DAYS ?? "90", 10) || 90,
+    gcpTrialLengthDays:
+      Number.parseInt(normalizeEnvValue(process.env.GCP_TRIAL_LENGTH_DAYS) ?? "90", 10) || 90,
     gcpTrialTotalCreditUsd: pick(
       "GCP_TRIAL_TOTAL_CREDIT_USD",
       process.env.GCP_TRIAL_TOTAL_CREDIT_USD,
@@ -71,13 +77,10 @@ export function getEnv() {
     appUrl: pick("NEXT_PUBLIC_APP_URL", process.env.NEXT_PUBLIC_APP_URL),
     telegramBotToken: pick("TELEGRAM_BOT_TOKEN", process.env.TELEGRAM_BOT_TOKEN),
     telegramChatId: pick("TELEGRAM_CHAT_ID", process.env.TELEGRAM_CHAT_ID),
-    inboxAutoSyncEnabled: (process.env.INBOX_AUTO_SYNC_ENABLED?.trim() || "true") !== "false",
+    inboxAutoSyncEnabled: (inboxAutoSyncEnabled || "true") !== "false",
     inboxPollIntervalSeconds:
-      Number.parseInt(
-        process.env.INBOX_POLL_INTERVAL_SECONDS?.trim() || "60",
-        10,
-      ) || 60,
-    schedulerSecret: process.env.SCHEDULER_SECRET?.trim() || null,
+      Number.parseInt(inboxPollIntervalSeconds || "60", 10) || 60,
+    schedulerSecret: normalizeEnvValue(process.env.SCHEDULER_SECRET),
   };
 }
 

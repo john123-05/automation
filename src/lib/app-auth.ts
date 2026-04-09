@@ -2,11 +2,11 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 import { appAccessSessionCookieName } from "@/lib/app-auth-shared";
+import { normalizeEnvValue } from "@/lib/env-shared";
 import { redirect } from "next/navigation";
 
 function getAppAccessPassword() {
-  const value = process.env.APP_ACCESS_PASSWORD?.trim();
-  return value ? value : null;
+  return normalizeEnvValue(process.env.APP_ACCESS_PASSWORD);
 }
 
 export function isAppAuthEnabled() {

@@ -2,6 +2,7 @@ import "server-only";
 
 import { access, mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { normalizeEnvValue } from "@/lib/env-shared";
 import { getSupabaseAdminClient, isSupabaseConfigured } from "@/lib/sales-machine/supabase";
 
 export type AvailableDocument = {
@@ -73,8 +74,8 @@ function buildAvailableDocuments(records: ResolvedDocumentRecord[]): AvailableDo
 }
 
 function getLocalDocumentDirectories() {
-  const configuredDirectory = process.env.DOCUMENTS_DIR?.trim();
-  const homeDirectory = process.env.HOME?.trim();
+  const configuredDirectory = normalizeEnvValue(process.env.DOCUMENTS_DIR);
+  const homeDirectory = normalizeEnvValue(process.env.HOME);
 
   return [
     configuredDirectory,
@@ -120,13 +121,16 @@ async function listLocalDocuments(): Promise<LocalDocumentRecord[]> {
 }
 
 function getSupabaseDocumentConfig() {
-  const bucket = process.env.SUPABASE_DOCUMENTS_BUCKET?.trim();
+  const bucket = normalizeEnvValue(process.env.SUPABASE_DOCUMENTS_BUCKET);
 
   if (!bucket || !isSupabaseConfigured()) {
     return null;
   }
 
-  const normalizedPrefix = process.env.SUPABASE_DOCUMENTS_PREFIX?.trim().replace(/^\/+|\/+$/g, "");
+  const normalizedPrefix = normalizeEnvValue(process.env.SUPABASE_DOCUMENTS_PREFIX)?.replace(
+    /^\/+|\/+$/g,
+    "",
+  );
 
   return {
     bucket,
@@ -243,8 +247,8 @@ async function pathExists(absolutePath: string) {
 }
 
 export function getDocumentsUploadDirectory() {
-  const configuredUploadDirectory = process.env.DOCUMENTS_UPLOAD_DIR?.trim();
-  const configuredDirectory = process.env.DOCUMENTS_DIR?.trim();
+  const configuredUploadDirectory = normalizeEnvValue(process.env.DOCUMENTS_UPLOAD_DIR);
+  const configuredDirectory = normalizeEnvValue(process.env.DOCUMENTS_DIR);
 
   return (
     configuredUploadDirectory ||

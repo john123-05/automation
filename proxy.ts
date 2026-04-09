@@ -1,10 +1,10 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { appAccessSessionCookieName } from "@/lib/app-auth-shared";
+import { normalizeEnvValue } from "@/lib/env-shared";
 
 function isAppAuthEnabled() {
-  const value = process.env.APP_ACCESS_PASSWORD?.trim();
-  return Boolean(value);
+  return Boolean(normalizeEnvValue(process.env.APP_ACCESS_PASSWORD));
 }
 
 async function createExpectedSessionValue(password: string) {
@@ -31,7 +31,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const password = process.env.APP_ACCESS_PASSWORD?.trim();
+  const password = normalizeEnvValue(process.env.APP_ACCESS_PASSWORD);
 
   if (!password) {
     return NextResponse.next();

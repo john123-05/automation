@@ -1,12 +1,12 @@
 import "server-only";
 
 import { createHash } from "node:crypto";
+import { normalizeEnvValue } from "@/lib/env-shared";
 
 export const documentsSessionCookieName = "documents_access";
 
 function getDocumentsAccessPassword() {
-  const value = process.env.DOCUMENTS_ACCESS_PASSWORD?.trim();
-  return value ? value : null;
+  return normalizeEnvValue(process.env.DOCUMENTS_ACCESS_PASSWORD);
 }
 
 function createDocumentsSessionValue(password: string) {

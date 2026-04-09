@@ -1,4 +1,5 @@
 import { getEnv } from "@/lib/env";
+import { normalizeEnvValue } from "@/lib/env-shared";
 import { syncOpportunityFromOutreachStateInDb } from "@/lib/sales-machine/agency-os";
 import { mutateDb, readDb } from "@/lib/sales-machine/store";
 import { auditLeadWebsite } from "@/lib/sales-machine/website-audit";
@@ -906,10 +907,10 @@ export async function getMailboxConnectConfig() {
   const env = getEnv();
 
   return {
-    clientId: process.env.GOOGLE_OAUTH_CLIENT_ID?.trim() || null,
-    clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET?.trim() || null,
-    redirectUri: process.env.GOOGLE_OAUTH_REDIRECT_URI?.trim() || null,
-    appUrl: process.env.NEXT_PUBLIC_APP_URL?.trim() || null,
+    clientId: normalizeEnvValue(process.env.GOOGLE_OAUTH_CLIENT_ID),
+    clientSecret: normalizeEnvValue(process.env.GOOGLE_OAUTH_CLIENT_SECRET),
+    redirectUri: normalizeEnvValue(process.env.GOOGLE_OAUTH_REDIRECT_URI),
+    appUrl: normalizeEnvValue(process.env.NEXT_PUBLIC_APP_URL),
     hasGemini: Boolean(env.geminiApiKey),
   };
 }
