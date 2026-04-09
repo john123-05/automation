@@ -5,8 +5,9 @@
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",
+    "build:hosted": "next build --webpack --experimental-build-mode compile",
     "start": "next start -p ${PORT:-3000}",
-    "hosted": "npm run build && npm run start",
+    "hosted": "npm run build:hosted && npm run start",
     "lint": "eslint",
     "inbox:idle": "tsx src/workers/inbox-idle.ts"
   },
