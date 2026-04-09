@@ -2246,7 +2246,16 @@ async function writeSupabaseDb(before: SalesMachineDb, after: SalesMachineDb) {
 
 export async function readDb() {
   if (getStorageMode() === "supabase") {
-    return readSupabaseDb();
+    try {
+      return await readSupabaseDb();
+    } catch (error) {
+      console.warn(
+        "Supabase read failed. Falling back to local storage.",
+        error instanceof Error ? error.message : String(error),
+      );
+
+      return readLocalDb().catch(() => ensureArrays(undefined));
+    }
   }
 
   return readLocalDb();

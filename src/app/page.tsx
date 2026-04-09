@@ -19,8 +19,6 @@ import type { Contact, Lead, RunKind, RunStatus, WorkflowRun } from "@/lib/sales
 import { formatDateTime } from "@/lib/sales-machine/utils";
 import { getUiSettings } from "@/lib/ui-settings";
 
-export const dynamic = "force-dynamic";
-
 function statusClasses(status: Lead["stage"]) {
   switch (status) {
     case "enriched":
