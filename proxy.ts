@@ -26,7 +26,7 @@ function isExcludedPath(pathname: string) {
   );
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   if (!isAppAuthEnabled() || isExcludedPath(request.nextUrl.pathname)) {
     return NextResponse.next();
   }
