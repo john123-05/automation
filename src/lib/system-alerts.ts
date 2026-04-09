@@ -22,7 +22,15 @@ const BILLING_ALERT_TTL_MS = 60 * 60 * 1000;
 
 type AlertCache = Record<string, string>;
 
+function isEphemeralHostedRuntime() {
+  return Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT);
+}
+
 async function readAlertCache(): Promise<AlertCache> {
+  if (isEphemeralHostedRuntime()) {
+    return {};
+  }
+
   try {
     const raw = await readFile(ALERT_CACHE_PATH, "utf8");
     const parsed = JSON.parse(raw) as AlertCache;
@@ -33,6 +41,10 @@ async function readAlertCache(): Promise<AlertCache> {
 }
 
 async function writeAlertCache(cache: AlertCache) {
+  if (isEphemeralHostedRuntime()) {
+    return;
+  }
+
   await mkdir(ALERT_CACHE_DIR, { recursive: true });
   await writeFile(ALERT_CACHE_PATH, JSON.stringify(cache, null, 2));
 }

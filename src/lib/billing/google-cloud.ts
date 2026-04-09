@@ -27,6 +27,10 @@ type BigQueryCredentials = {
   project_id?: string;
 };
 
+function isEphemeralHostedRuntime() {
+  return Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT);
+}
+
 function parseBigQueryCredentials(rawJson: string): BigQueryCredentials {
   const parsed = JSON.parse(rawJson) as BigQueryCredentials;
 
@@ -216,6 +220,10 @@ async function ensureBillingCacheDir() {
 }
 
 async function readGoogleCloudBillingCache() {
+  if (isEphemeralHostedRuntime()) {
+    return null;
+  }
+
   try {
     const raw = (await readFile(GOOGLE_CLOUD_BILLING_CACHE_PATH, "utf8")).trim();
 
@@ -238,19 +246,32 @@ async function readGoogleCloudBillingCache() {
 async function writeGoogleCloudBillingCache(snapshot: GoogleBillingSnapshot) {
   const cachedAt = new Date().toISOString();
   const expiresAt = new Date(Date.now() + GOOGLE_CLOUD_BILLING_CACHE_TTL_MS).toISOString();
+  const cachedSnapshot = {
+    ...snapshot,
+    cacheExpiresAt: expiresAt,
+  };
+
+  if (isEphemeralHostedRuntime()) {
+    return cachedSnapshot;
+  }
+
   const payload: GoogleBillingCacheRecord = {
-    snapshot: {
-      ...snapshot,
-      cacheExpiresAt: expiresAt,
-    },
+    snapshot: cachedSnapshot,
     cachedAt,
     expiresAt,
   };
 
-  await ensureBillingCacheDir();
-  await writeFile(GOOGLE_CLOUD_BILLING_CACHE_PATH, JSON.stringify(payload, null, 2));
+  try {
+    await ensureBillingCacheDir();
+    await writeFile(GOOGLE_CLOUD_BILLING_CACHE_PATH, JSON.stringify(payload, null, 2));
+  } catch (error) {
+    console.warn(
+      "Failed to persist Google Cloud billing cache.",
+      error instanceof Error ? error.message : String(error),
+    );
+  }
 
-  return payload.snapshot;
+  return cachedSnapshot;
 }
 
 export async function refreshGoogleCloudBillingSnapshot(options?: {
