@@ -54,6 +54,26 @@ If the two Supabase env vars are blank, the app falls back to `.data/sales-machi
 
 `GCP_BIGQUERY_SERVICE_ACCOUNT_JSON` should be a single-line JSON string for a service account that can read your billing export dataset. If the `private_key` contains newlines, keep them escaped as `\n`.
 
+For hosted environments like Bolt, do not use a local file path such as `/Users/.../service-account.json`. Paste the JSON itself into the environment variable.
+
+## Bolt deployment
+
+If you deploy this app to Bolt, set the environment variables in Bolt's environment/secrets UI instead of committing a `.env` file into the repo.
+
+Recommended hosted values:
+
+- `NEXT_PUBLIC_APP_URL=https://john123-05-automatio-ffon.bolt.host`
+- `GOOGLE_OAUTH_REDIRECT_URI=https://john123-05-automatio-ffon.bolt.host/api/mailboxes/google/callback`
+- `APP_ACCESS_PASSWORD=<your-login-password>`
+- `SCHEDULER_SECRET=<long-random-secret>`
+
+Important hosted notes:
+
+- Bolt will not be able to read files from your Mac such as `~/Downloads/Wichtige Dokumente`.
+- For documents on Bolt, use uploads inside the app or a private Supabase storage bucket.
+- The Telegram webhook URL should be `https://john123-05-automatio-ffon.bolt.host/api/telegram/webhook`
+- If you only want the app to start first, you can leave `GCP_BIGQUERY_SERVICE_ACCOUNT_JSON` blank and use the manual billing fallback fields until BigQuery is configured correctly.
+
 ## Supabase setup
 
 1. Create a Supabase project.
