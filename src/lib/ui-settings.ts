@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import {
   uiLanguageCookieName,
   uiThemeCookieName,
@@ -11,6 +10,7 @@ export async function getUiSettings(): Promise<{
   theme: UiTheme;
 }> {
   try {
+    const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
     const language: UiLanguage =
       cookieStore.get(uiLanguageCookieName)?.value === "de" ? "de" : "en";

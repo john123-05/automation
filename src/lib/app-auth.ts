@@ -1,7 +1,6 @@
 import "server-only";
 
 import { createHash } from "node:crypto";
-import { cookies } from "next/headers";
 import { appAccessSessionCookieName } from "@/lib/app-auth-shared";
 
 function getAppAccessPassword() {
@@ -45,6 +44,7 @@ export async function hasAppAccess() {
   }
 
   try {
+    const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
     const actualCookieValue = cookieStore.get(appAccessSessionCookieName)?.value;
 

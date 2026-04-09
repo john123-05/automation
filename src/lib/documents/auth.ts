@@ -1,7 +1,6 @@
 import "server-only";
 
 import { createHash } from "node:crypto";
-import { cookies } from "next/headers";
 
 export const documentsSessionCookieName = "documents_access";
 
@@ -46,6 +45,7 @@ export async function hasDocumentsAccess() {
   }
 
   try {
+    const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
     const actualCookieValue = cookieStore.get(documentsSessionCookieName)?.value;
 
