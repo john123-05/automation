@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MailboxConnectOptions } from "@/components/mailbox-connect-options";
 import { SettingsPreferencesForm } from "@/components/settings-preferences-form";
 import { SetupVaultForm } from "@/components/setup-vault-form";
+import { requireAppAccess } from "@/lib/app-auth";
 import { t } from "@/lib/copy";
 import { getEnv } from "@/lib/env";
 import { getOutreachSnapshot } from "@/lib/sales-machine/store";
@@ -11,6 +12,7 @@ import { getUiSettings } from "@/lib/ui-settings";
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
+  await requireAppAccess("/settings");
   const env = getEnv();
   const { language, theme } = await getUiSettings();
   const snapshot = await getOutreachSnapshot();

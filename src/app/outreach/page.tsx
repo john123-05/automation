@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ApiActionButton } from "@/components/api-action-button";
 import { OutreachShell } from "@/components/outreach-shell";
+import { requireAppAccess } from "@/lib/app-auth";
 import { getOutreachSnapshot } from "@/lib/sales-machine/store";
 import { formatDateTime } from "@/lib/sales-machine/utils";
 
@@ -11,6 +12,7 @@ type OutreachPageProps = {
 };
 
 export default async function OutreachPage({ searchParams }: OutreachPageProps) {
+  await requireAppAccess("/outreach");
   const snapshot = await getOutreachSnapshot();
   const params = (searchParams ? await searchParams : undefined) ?? {};
   const mailboxConnected = typeof params.mailboxConnected === "string" ? params.mailboxConnected : null;

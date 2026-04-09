@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { ApiActionButton } from "@/components/api-action-button";
 import { CampaignTabs } from "@/components/campaign-tabs";
 import { OutreachShell } from "@/components/outreach-shell";
+import { requireAppAccess } from "@/lib/app-auth";
 import {
   formatAuditScopeLabel,
   formatServiceLabel,
@@ -21,6 +22,7 @@ type CampaignOverviewPageProps = {
 
 export default async function CampaignOverviewPage({ params }: CampaignOverviewPageProps) {
   const { id } = await params;
+  await requireAppAccess(`/outreach/campaign/${id}/overview`);
   const data = await getCampaignWorkspaceData(id);
 
   if (!data) {

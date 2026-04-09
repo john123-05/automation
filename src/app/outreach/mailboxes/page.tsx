@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MailboxConnectOptions } from "@/components/mailbox-connect-options";
 import { OutreachShell } from "@/components/outreach-shell";
+import { requireAppAccess } from "@/lib/app-auth";
 import { getMailboxProviderLabel, mailboxSupportsInboxSync } from "@/lib/sales-machine/mailbox-config";
 import { getOutreachSnapshot } from "@/lib/sales-machine/store";
 import {
@@ -13,6 +14,7 @@ import { formatDateTime } from "@/lib/sales-machine/utils";
 export const dynamic = "force-dynamic";
 
 export default async function OutreachMailboxesPage() {
+  await requireAppAccess("/outreach/mailboxes");
   const snapshot = await getOutreachSnapshot();
   const connectedMailboxes = snapshot.connectedMailboxes.sort((a, b) =>
     b.updatedAt.localeCompare(a.updatedAt),

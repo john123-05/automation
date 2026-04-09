@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SetupVaultForm } from "@/components/setup-vault-form";
+import { requireAppAccess } from "@/lib/app-auth";
 import { getEnv } from "@/lib/env";
 import { getSetupVaultSectionsState } from "@/lib/setup-vault";
 
@@ -9,7 +10,8 @@ export const metadata = {
     "Local setup vault for rotating API keys, billing credentials, Supabase storage, and Gmail OAuth without hand-editing environment files.",
 };
 
-export default function SetupPage() {
+export default async function SetupPage() {
+  await requireAppAccess("/setup");
   const env = getEnv();
   const sections = getSetupVaultSectionsState({
     GOOGLE_MAPS_API_KEY: env.googleMapsApiKey,

@@ -7,6 +7,7 @@ import { OutreachStateSelector } from "@/components/outreach-state-selector";
 import { SendSequenceStepButton } from "@/components/send-sequence-step-button";
 import { SequenceStepEditor } from "@/components/sequence-step-editor";
 import { SuppressRecipientButton } from "@/components/suppress-recipient-button";
+import { requireAppAccess } from "@/lib/app-auth";
 import {
   formatServiceLabel,
   formatStateLabel,
@@ -39,6 +40,7 @@ export default async function CampaignLeadsPage({
   searchParams,
 }: CampaignLeadsPageProps) {
   const { id } = await params;
+  await requireAppAccess(`/outreach/campaign/${id}/leads`);
   const query = (searchParams ? await searchParams : undefined) ?? {};
   const data = await getCampaignWorkspaceData(id);
 

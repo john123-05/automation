@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DocumentsShell } from "@/components/documents-shell";
+import { requireAppAccess } from "@/lib/app-auth";
 import { hasDocumentsAccess, isDocumentsAuthEnabled } from "@/lib/documents/auth";
 import { listAvailableDocuments } from "@/lib/documents/storage";
 
@@ -37,6 +38,7 @@ function formatUpdatedAt(value: string | null) {
 }
 
 export default async function DocumentsPage({ searchParams }: DocumentsPageProps) {
+  await requireAppAccess("/documents");
   const params = (searchParams ? await searchParams : undefined) ?? {};
   const authEnabled = isDocumentsAuthEnabled();
   const hasAccess = await hasDocumentsAccess();

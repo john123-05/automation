@@ -4,6 +4,7 @@ import { CampaignMailboxForm } from "@/components/campaign-mailbox-form";
 import { CampaignTabs } from "@/components/campaign-tabs";
 import { MailboxConnectOptions } from "@/components/mailbox-connect-options";
 import { OutreachShell } from "@/components/outreach-shell";
+import { requireAppAccess } from "@/lib/app-auth";
 import {
   formatAuditScopeLabel,
   formatServiceLabel,
@@ -40,6 +41,7 @@ function extractLeadDomains(urls: Array<string | null>) {
 
 export default async function CampaignOptionsPage({ params }: CampaignOptionsPageProps) {
   const { id } = await params;
+  await requireAppAccess(`/outreach/campaign/${id}/options`);
   const data = await getCampaignWorkspaceData(id);
 
   if (!data) {

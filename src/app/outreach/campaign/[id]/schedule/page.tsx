@@ -3,6 +3,7 @@ import { ApiActionButton } from "@/components/api-action-button";
 import { CampaignScheduleForm } from "@/components/campaign-schedule-form";
 import { CampaignTabs } from "@/components/campaign-tabs";
 import { OutreachShell } from "@/components/outreach-shell";
+import { requireAppAccess } from "@/lib/app-auth";
 import {
   formatServiceLabel,
   getCampaignWorkspaceData,
@@ -20,6 +21,7 @@ type CampaignSchedulePageProps = {
 
 export default async function CampaignSchedulePage({ params }: CampaignSchedulePageProps) {
   const { id } = await params;
+  await requireAppAccess(`/outreach/campaign/${id}/schedule`);
   const data = await getCampaignWorkspaceData(id);
 
   if (!data) {

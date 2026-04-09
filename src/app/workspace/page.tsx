@@ -24,6 +24,7 @@ import { MobileDrawer } from "@/components/mobile-drawer";
 import { SequenceStepEditor } from "@/components/sequence-step-editor";
 import { QuickAddCompanyModal } from "@/components/quick-add-company-modal";
 import { QuickAddContactModal } from "@/components/quick-add-contact-modal";
+import { requireAppAccess } from "@/lib/app-auth";
 import { getOutreachSnapshot } from "@/lib/sales-machine/store";
 import {
   buildWorkspaceCompanyRecords,
@@ -211,6 +212,7 @@ function buildWorkspaceHref(
 }
 
 export default async function WorkspacePage({ searchParams }: WorkspacePageProps) {
+  await requireAppAccess("/workspace");
   const snapshot = await getOutreachSnapshot();
   const params = (searchParams ? await searchParams : undefined) ?? {};
   const requestedTab = readSearchParam(params.tab);

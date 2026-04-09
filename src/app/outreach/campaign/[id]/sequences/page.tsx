@@ -6,6 +6,7 @@ import { CampaignStepTemplateEditor } from "@/components/campaign-step-template-
 import { CampaignTabs } from "@/components/campaign-tabs";
 import { OutreachShell } from "@/components/outreach-shell";
 import { SequenceStepEditor } from "@/components/sequence-step-editor";
+import { requireAppAccess } from "@/lib/app-auth";
 import {
   formatServiceLabel,
   getCampaignWorkspaceData,
@@ -35,6 +36,7 @@ export default async function CampaignSequencesPage({
   searchParams,
 }: CampaignSequencesPageProps) {
   const { id } = await params;
+  await requireAppAccess(`/outreach/campaign/${id}/sequences`);
   const query = (searchParams ? await searchParams : undefined) ?? {};
   const data = await getCampaignWorkspaceData(id);
 

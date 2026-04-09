@@ -1,5 +1,6 @@
 import { OutreachShell } from "@/components/outreach-shell";
 import { TemplateServiceSwitcher } from "@/components/template-service-switcher";
+import { requireAppAccess } from "@/lib/app-auth";
 import { getOutreachSnapshot } from "@/lib/sales-machine/store";
 import { formatServiceLabel, getOutreachShellStats } from "@/lib/sales-machine/outreach-ui";
 
@@ -16,6 +17,7 @@ function readSearchParam(value: string | string[] | undefined) {
 export default async function OutreachTemplatesPage({
   searchParams,
 }: OutreachTemplatesPageProps) {
+  await requireAppAccess("/outreach/templates");
   const snapshot = await getOutreachSnapshot();
   const query = (searchParams ? await searchParams : undefined) ?? {};
   const requestedServiceKey = readSearchParam(query.service);

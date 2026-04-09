@@ -4,6 +4,7 @@ import { ManualReplyForm } from "@/components/manual-reply-form";
 import { OutreachShell } from "@/components/outreach-shell";
 import { OutreachStateSelector } from "@/components/outreach-state-selector";
 import { SuppressRecipientButton } from "@/components/suppress-recipient-button";
+import { requireAppAccess } from "@/lib/app-auth";
 import { getOutreachSnapshot } from "@/lib/sales-machine/store";
 import {
   formatServiceLabel,
@@ -25,6 +26,7 @@ function readParam(value: string | string[] | undefined) {
 }
 
 export default async function OutreachInboxPage({ searchParams }: OutreachInboxPageProps) {
+  await requireAppAccess("/outreach/inbox");
   const snapshot = await getOutreachSnapshot();
   const params = (searchParams ? await searchParams : undefined) ?? {};
   const activeMailboxId = readParam(params.mailboxId);

@@ -11,6 +11,7 @@ import { RunHistoryPreview } from "@/components/run-history-preview";
 import { SearchLeadsForm } from "@/components/search-leads-form";
 import { SettingsButton } from "@/components/settings-button";
 import { UniversalSearchLauncher } from "@/components/universal-search-launcher";
+import { requireAppAccess } from "@/lib/app-auth";
 import { t } from "@/lib/copy";
 import { listWarmupAccounts } from "@/lib/email-warmup-server";
 import { getProviderStatuses, getStorageMode } from "@/lib/env";
@@ -288,6 +289,7 @@ type DashboardNotice = {
 };
 
 export default async function Home() {
+  await requireAppAccess("/");
   const { language, theme } = await getUiSettings();
   const snapshot = await getDashboardSnapshot(getProviderStatuses());
   const warmupAccounts = await listWarmupAccounts();

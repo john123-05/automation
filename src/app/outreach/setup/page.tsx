@@ -2,6 +2,7 @@ import { CampaignCreateForm } from "@/components/campaign-create-form";
 import { OutreachAuditForm } from "@/components/outreach-audit-form";
 import { OutreachSequenceForm } from "@/components/outreach-sequence-form";
 import { OutreachShell } from "@/components/outreach-shell";
+import { requireAppAccess } from "@/lib/app-auth";
 import { getOutreachSnapshot } from "@/lib/sales-machine/store";
 import { getOutreachShellStats } from "@/lib/sales-machine/outreach-ui";
 import { formatDateTime } from "@/lib/sales-machine/utils";
@@ -21,6 +22,7 @@ function getLeadRunLabel(run: Awaited<ReturnType<typeof getOutreachSnapshot>>["r
 }
 
 export default async function OutreachSetupPage() {
+  await requireAppAccess("/outreach/setup");
   const snapshot = await getOutreachSnapshot();
   const runOptions = snapshot.runs
     .filter((run) => run.kind === "lead-search")
