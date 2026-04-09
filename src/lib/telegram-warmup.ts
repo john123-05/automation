@@ -1,4 +1,4 @@
-import { listWarmupAccountsWithStatus } from "@/lib/email-warmup";
+import { listWarmupAccountsWithStatus } from "@/lib/email-warmup-server";
 
 function normalizeWhitespace(value: string) {
   return value.replace(/\s+/g, " ").trim();

@@ -2,7 +2,7 @@ import "server-only";
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { calculateWarmupDaysLeft, formatWarmupTrialEndDate } from "@/lib/email-warmup-shared";
+import { calculateWarmupDaysLeft } from "@/lib/email-warmup-shared";
 import { createId } from "@/lib/sales-machine/utils";
 
 export type WarmupAccount = {
@@ -11,8 +11,6 @@ export type WarmupAccount = {
   trialEndsOn: string;
   createdAt: string;
 };
-
-export { calculateWarmupDaysLeft, formatWarmupTrialEndDate };
 
 const WARMUP_DATA_DIR = path.join(process.cwd(), ".data");
 const WARMUP_DATA_PATH = path.join(WARMUP_DATA_DIR, "email-warmup-accounts.json");

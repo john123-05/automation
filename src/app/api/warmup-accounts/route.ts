@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { addWarmupAccount, listWarmupAccounts } from "@/lib/email-warmup";
+import { addWarmupAccount, listWarmupAccounts } from "@/lib/email-warmup-server";
 import { notifyServerIssue } from "@/lib/system-alerts";
 import { serializeError } from "@/lib/sales-machine/utils";
 

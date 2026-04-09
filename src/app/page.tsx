@@ -12,7 +12,7 @@ import { SearchLeadsForm } from "@/components/search-leads-form";
 import { SettingsButton } from "@/components/settings-button";
 import { UniversalSearchLauncher } from "@/components/universal-search-launcher";
 import { t } from "@/lib/copy";
-import { listWarmupAccounts } from "@/lib/email-warmup";
+import { listWarmupAccounts } from "@/lib/email-warmup-server";
 import { getProviderStatuses } from "@/lib/env";
 import { getDashboardSnapshot } from "@/lib/sales-machine/store";
 import type { Contact, Lead, RunKind, RunStatus, WorkflowRun } from "@/lib/sales-machine/types";

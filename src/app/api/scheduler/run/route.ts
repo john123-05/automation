@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { listWarmupAccountsWithStatus } from "@/lib/email-warmup";
+import { listWarmupAccountsWithStatus } from "@/lib/email-warmup-server";
 import { getEnv } from "@/lib/env";
 import { runCampaignScheduler } from "@/lib/sales-machine/campaigns";
 import { notifyServerIssue, notifyWarmupTrialExpiring } from "@/lib/system-alerts";
