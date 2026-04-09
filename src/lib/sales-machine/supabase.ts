@@ -69,3 +69,36 @@ export function getSupabaseAdminClient() {
 
   return cachedClient;
 }
+
+export async function probeSupabaseTable(tableName: string) {
+  if (!isSupabaseConfigured()) {
+    return {
+      configured: false,
+      exists: false,
+      error: "Supabase is not configured.",
+    };
+  }
+
+  const client = getSupabaseAdminClient();
+  const result = await client.from(tableName).select("id", { head: true, count: "exact" });
+
+  if (!result.error) {
+    return {
+      configured: true,
+      exists: true,
+      error: null,
+    };
+  }
+
+  const message = result.error.message ?? "Unknown Supabase error.";
+  const missingFromSchemaCache =
+    result.error.code === "PGRST205" ||
+    message.toLowerCase().includes("schema cache") ||
+    message.toLowerCase().includes("could not find the table");
+
+  return {
+    configured: true,
+    exists: !missingFromSchemaCache,
+    error: message,
+  };
+}

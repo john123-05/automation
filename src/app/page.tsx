@@ -13,8 +13,9 @@ import { SettingsButton } from "@/components/settings-button";
 import { UniversalSearchLauncher } from "@/components/universal-search-launcher";
 import { t } from "@/lib/copy";
 import { listWarmupAccounts } from "@/lib/email-warmup-server";
-import { getProviderStatuses } from "@/lib/env";
+import { getProviderStatuses, getStorageMode } from "@/lib/env";
 import { getDashboardSnapshot } from "@/lib/sales-machine/store";
+import { probeSupabaseTable, salesMachineTables } from "@/lib/sales-machine/supabase";
 import type { Contact, Lead, RunKind, RunStatus, WorkflowRun } from "@/lib/sales-machine/types";
 import { formatDateTime } from "@/lib/sales-machine/utils";
 import { getUiSettings } from "@/lib/ui-settings";
@@ -279,6 +280,13 @@ function formatSearchRunLabel(
   return `${niche} in ${location} • ${leadCount} lead${leadCount === 1 ? "" : "s"}`;
 }
 
+type DashboardNotice = {
+  id: string;
+  title: string;
+  message: string;
+  tone: "amber" | "rose";
+};
+
 export default async function Home() {
   const { language, theme } = await getUiSettings();
   const snapshot = await getDashboardSnapshot(getProviderStatuses());
@@ -294,6 +302,68 @@ export default async function Home() {
         label: formatSearchRunLabel(run, leadCount),
       };
     });
+  const notices: DashboardNotice[] = [];
+  const trialCreditsCard = snapshot.billingOverview.cards.find((card) => card.id === "trial-credits");
+  const openAiCard = snapshot.billingOverview.cards.find((card) => card.id === "openai");
+
+  if (process.env.VERCEL && !process.env.APP_ACCESS_PASSWORD?.trim()) {
+    notices.push({
+      id: "app-auth-missing",
+      title: "Website is currently public",
+      message:
+        "APP_ACCESS_PASSWORD is not active in the hosted environment yet, so anyone with the URL can open the app. Add the password in Vercel Production env vars and redeploy.",
+      tone: "rose",
+    });
+  }
+
+  if (trialCreditsCard && trialCreditsCard.status !== "ready") {
+    notices.push({
+      id: "trial-credits-hosted",
+      title: "Trial Credits are using fallback data",
+      message:
+        trialCreditsCard.summary ||
+        "BigQuery-derived billing is not fully available on this deployment, so the card is using fallback values.",
+      tone: "amber",
+    });
+  }
+
+  if (openAiCard && openAiCard.status !== "ready") {
+    notices.push({
+      id: "openai-billing-hosted",
+      title: "OpenAI billing is not fully configured",
+      message:
+        openAiCard.summary ||
+        "The OpenAI organization billing API is not returning data on this deployment yet.",
+      tone: openAiCard.status === "error" ? "rose" : "amber",
+    });
+  }
+
+  if (getStorageMode() === "supabase") {
+    const mailboxTableChecks = await Promise.all([
+      probeSupabaseTable(salesMachineTables.connectedMailboxes),
+      probeSupabaseTable(salesMachineTables.emailThreads),
+      probeSupabaseTable(salesMachineTables.emailMessages),
+    ]);
+    const missingMailTables = mailboxTableChecks.filter((entry) => !entry.exists);
+
+    if (missingMailTables.length > 0) {
+      notices.push({
+        id: "supabase-outreach-schema",
+        title: "Hosted inbox tables are missing",
+        message:
+          "Supabase has your leads and contacts, but the outreach mail tables are not present in the hosted database yet. Apply the latest supabase/schema.sql to create connected_mailboxes, email_threads, and email_messages.",
+        tone: "rose",
+      });
+    } else if (!snapshot.emailThreads.length) {
+      notices.push({
+        id: "hosted-inbox-empty",
+        title: "Hosted inbox is connected but empty",
+        message:
+          "The mail tables exist, but this deployment does not have synced mailbox/thread data yet. Run an inbox sync on the hosted app after the mailbox records have been migrated.",
+        tone: "amber",
+      });
+    }
+  }
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[1500px] flex-col gap-8 px-4 py-6 pb-28 sm:px-6 lg:px-8 lg:pb-6">
@@ -367,6 +437,25 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {notices.length ? (
+        <section className="space-y-3">
+          {notices.map((notice) => (
+            <div
+              key={notice.id}
+              className={`rounded-[26px] border px-5 py-4 ${
+                notice.tone === "rose"
+                  ? "border-rose-200 bg-rose-50 text-rose-900"
+                  : "border-amber-200 bg-amber-50 text-amber-950"
+              }`}
+            >
+              <p className="text-xs uppercase tracking-[0.18em] opacity-70">Hosted check</p>
+              <p className="mt-2 text-base font-semibold">{notice.title}</p>
+              <p className="mt-2 text-sm leading-6 opacity-90">{notice.message}</p>
+            </div>
+          ))}
+        </section>
+      ) : null}
 
       <section className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

@@ -66,22 +66,29 @@ function buildTrialCreditsCard({
   }
 
   if (googleCloudBilling.error || googleCloudBilling.spendSinceTrialStart === null) {
+    const usingManualFallback = googleCloudBilling.manualFallbackUsed;
+
     return {
       id: "trial-credits",
       title: "Trial Credits",
       titleSuffix: formatDateLabel(trialEndDate),
       scopeLabel: "manual console tracking",
-      status: googleCloudBilling.pendingExportData ? "ready" : "error",
+      status:
+        googleCloudBilling.pendingExportData || usingManualFallback ? "setup-needed" : "error",
       statusLabel: googleCloudBilling.pendingExportData
-        ? googleCloudBilling.manualFallbackUsed
+        ? usingManualFallback
           ? "Fallback"
           : "Waiting"
-        : "Issue",
+        : usingManualFallback
+          ? "Console"
+          : "Issue",
       summary: googleCloudBilling.pendingExportData
-        ? googleCloudBilling.manualFallbackUsed
+        ? usingManualFallback
           ? "Using the latest console credit value until BigQuery-derived credit tracking is trustworthy."
           : "Billing export is connected, but Google has not filled the table yet."
-        : "",
+        : usingManualFallback
+          ? "BigQuery is not available on this deployment right now, so the card is using your manual console values."
+          : googleCloudBilling.error ?? "",
       metrics: [
         {
           label: "Days left",
@@ -175,6 +182,9 @@ function buildOpenAiCard({
     : orgBilling.error
       ? "error"
       : "ready";
+  const noLiveOpenAiBilling = Boolean(orgBilling.error) && !appSpend.lastUpdatedAt;
+  const setupNeeded = orgBilling.error?.includes("OPENAI_ADMIN_KEY");
+  const metricCurrency = useOrgFallback ? orgBilling.currency : appSpend.currency;
 
   return {
     id: "openai",
@@ -186,24 +196,28 @@ function buildOpenAiCard({
     status,
     statusLabel: orgBilling.error ? (status === "setup-needed" ? "Setup needed" : "Issue") : "Live",
     summary: orgBilling.error
-      ? "Org costs API is unavailable right now."
+      ? setupNeeded
+        ? "OPENAI_ADMIN_KEY is missing in the hosted environment, so organization-wide OpenAI costs cannot load."
+        : orgBilling.error
       : useOrgFallback
         ? "New enrichment runs will switch this card over to app-tracked spend."
         : `Org month to date: ${formatMoney(orgBilling.monthToDateCost, orgBilling.currency)}.`,
     metrics: [
       {
         label: useOrgFallback ? "Month to date" : "App MTD",
-        value: formatMoney(
-          useOrgFallback ? orgBilling.monthToDateCost : appSpend.monthToDateCost,
-          useOrgFallback ? orgBilling.currency : appSpend.currency,
-        ),
+        value: noLiveOpenAiBilling
+          ? setupNeeded
+            ? "Add admin key"
+            : "Unavailable"
+          : formatMoney(useOrgFallback ? orgBilling.monthToDateCost : appSpend.monthToDateCost, metricCurrency),
       },
       {
         label: useOrgFallback ? "Last 7 days" : "App 7 days",
-        value: formatMoney(
-          useOrgFallback ? orgBilling.last7DaysCost : appSpend.last7DaysCost,
-          useOrgFallback ? orgBilling.currency : appSpend.currency,
-        ),
+        value: noLiveOpenAiBilling
+          ? setupNeeded
+            ? "Add admin key"
+            : "Unavailable"
+          : formatMoney(useOrgFallback ? orgBilling.last7DaysCost : appSpend.last7DaysCost, metricCurrency),
       },
     ],
     lastUpdatedAt: appSpend.lastUpdatedAt ?? orgBilling.lastUpdatedAt,
