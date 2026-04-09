@@ -78,17 +78,44 @@ async function fetchCostBuckets({
       url.searchParams.set("page", nextPage);
     }
 
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${adminKey}`,
-      },
-      cache: "no-store",
-    });
+    let response: Response | null = null;
+    let lastError: Error | null = null;
 
-    if (!response.ok) {
-      const body = await response.text();
-      throw new Error(`OpenAI costs request failed (${response.status}): ${body}`);
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      try {
+        response = await fetch(url, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${adminKey}`,
+          },
+          cache: "no-store",
+          signal: AbortSignal.timeout(20_000),
+        });
+
+        if (response.ok) {
+          lastError = null;
+          break;
+        }
+
+        const body = await response.text();
+        lastError = new Error(`OpenAI costs request failed (${response.status}): ${body}`);
+
+        if (response.status < 500 || attempt === 3) {
+          throw lastError;
+        }
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+
+        if (attempt === 3) {
+          throw lastError;
+        }
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, attempt * 750));
+    }
+
+    if (!response || !response.ok) {
+      throw lastError ?? new Error("OpenAI costs request failed.");
     }
 
     const payload = (await response.json()) as OpenAiCostsResponse;
