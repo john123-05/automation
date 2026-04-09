@@ -1,0 +1,38 @@
+{
+  "name": "automation",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "inbox:idle": "tsx src/workers/inbox-idle.ts"
+  },
+  "dependencies": {
+    "@google-cloud/bigquery": "^8.1.1",
+    "@supabase/supabase-js": "^2.100.1",
+    "@types/nodemailer": "^8.0.0",
+    "imapflow": "^1.3.1",
+    "mailparser": "^3.9.8",
+    "next": "16.2.1",
+    "nodemailer": "^8.0.5",
+    "openai": "^6.33.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "server-only": "^0.0.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/mailparser": "^3.4.6",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.1",
+    "tailwindcss": "^4",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
+  }
+}

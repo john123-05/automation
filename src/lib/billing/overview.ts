@@ -1,0 +1,234 @@
+import "server-only";
+import { getAppTrackedOpenAiSpend } from "@/lib/billing/openai-app";
+import type { BillingCard, BillingOverview } from "@/lib/billing/types";
+import { getGoogleCloudBillingSnapshot } from "@/lib/billing/google-cloud";
+import { getOpenAiBillingSnapshot } from "@/lib/billing/openai";
+import {
+  calculateTrialEndDate,
+  calculateDaysLeft,
+  formatDateLabel,
+  formatDaysLeft,
+  formatMoney,
+  parseTrialCreditUsd,
+  parseTrialStartDate,
+} from "@/lib/billing/utils";
+import { getEnv } from "@/lib/env";
+import type { WorkflowRun } from "@/lib/sales-machine/types";
+
+function buildTrialCreditsCard({
+  googleCloudBilling,
+}: {
+  googleCloudBilling: Awaited<ReturnType<typeof getGoogleCloudBillingSnapshot>>;
+}): BillingCard {
+  const env = getEnv();
+  const trialStartDate = parseTrialStartDate(env.gcpTrialStartDate);
+  const trialTotalCreditUsd = parseTrialCreditUsd(env.gcpTrialTotalCreditUsd);
+  const now = new Date();
+  const trialEndDate = trialStartDate
+    ? calculateTrialEndDate({
+        trialStartDate,
+        trialLengthDays: env.gcpTrialLengthDays,
+      })
+    : null;
+  const manualRemainingCredit = googleCloudBilling.manualRemainingCredit ?? null;
+  const hasManualRemainingCredit = manualRemainingCredit !== null;
+  const hasDerivedLiveCredit =
+    trialTotalCreditUsd !== null && googleCloudBilling.trialCreditUsed !== null;
+  const derivedRemainingCredit = hasDerivedLiveCredit
+    ? Math.max(0, trialTotalCreditUsd - (googleCloudBilling.trialCreditUsed ?? 0))
+    : null;
+
+  if (!trialStartDate) {
+    return {
+      id: "trial-credits",
+      title: "Trial Credits",
+      titleSuffix: null,
+      scopeLabel: "manual console tracking",
+      status: "setup-needed",
+      statusLabel: "Setup needed",
+      summary: "",
+      metrics: [
+        {
+          label: "Days left",
+          value: "Not configured",
+        },
+        {
+          label: "Used credit",
+          value: "Not configured",
+        },
+        {
+          label: "Remaining credit",
+          value: "Not configured",
+        },
+      ],
+      lastUpdatedAt: null,
+    };
+  }
+
+  if (googleCloudBilling.error || googleCloudBilling.spendSinceTrialStart === null) {
+    return {
+      id: "trial-credits",
+      title: "Trial Credits",
+      titleSuffix: formatDateLabel(trialEndDate),
+      scopeLabel: "manual console tracking",
+      status: googleCloudBilling.pendingExportData ? "ready" : "error",
+      statusLabel: googleCloudBilling.pendingExportData
+        ? googleCloudBilling.manualFallbackUsed
+          ? "Fallback"
+          : "Waiting"
+        : "Issue",
+      summary: googleCloudBilling.pendingExportData
+        ? googleCloudBilling.manualFallbackUsed
+          ? "Using the latest console credit value until BigQuery-derived credit tracking is trustworthy."
+          : "Billing export is connected, but Google has not filled the table yet."
+        : "",
+      metrics: [
+        {
+          label: "Days left",
+          value: formatDaysLeft(
+            calculateDaysLeft({
+              trialStartDate,
+              trialLengthDays: env.gcpTrialLengthDays,
+              now,
+            }),
+          ),
+        },
+        {
+          label: "Used credit",
+          value:
+            googleCloudBilling.trialCreditUsed === null
+              ? googleCloudBilling.pendingExportData
+                ? googleCloudBilling.manualFallbackUsed
+                  ? "Manual fallback not set"
+                  : "Waiting for export"
+                : "Unavailable"
+              : formatMoney(
+                  googleCloudBilling.trialCreditUsed,
+                  googleCloudBilling.currency,
+                ),
+        },
+        {
+          label: "Remaining credit",
+          value: hasManualRemainingCredit
+            ? formatMoney(manualRemainingCredit, googleCloudBilling.currency)
+            : "Add console value",
+        },
+      ],
+      lastUpdatedAt: googleCloudBilling.lastUpdatedAt,
+    };
+  }
+
+  const daysLeft = calculateDaysLeft({
+    trialStartDate,
+    trialLengthDays: env.gcpTrialLengthDays,
+    now,
+  });
+
+  return {
+    id: "trial-credits",
+    title: "Trial Credits",
+    titleSuffix: formatDateLabel(trialEndDate),
+    scopeLabel: hasDerivedLiveCredit ? "BigQuery-derived trial tracking" : "manual console tracking",
+    status: "ready",
+    statusLabel: hasDerivedLiveCredit ? "Live" : hasManualRemainingCredit ? "Console" : "Needs update",
+    summary: hasDerivedLiveCredit
+      ? "Used and remaining trial credits are derived live from BigQuery spend since the trial start date."
+      : hasManualRemainingCredit
+        ? "Remaining credit is shown from the latest Google Cloud console value."
+        : "Add the latest remaining credit from the Google Cloud console to keep this card accurate.",
+    metrics: [
+      {
+        label: "Days left",
+        value: formatDaysLeft(daysLeft),
+      },
+      {
+        label: "Used credit",
+        value:
+          googleCloudBilling.trialCreditUsed === null
+            ? "Unavailable"
+            : formatMoney(googleCloudBilling.trialCreditUsed, googleCloudBilling.currency),
+      },
+      {
+        label: "Remaining credit",
+        value: hasDerivedLiveCredit
+          ? formatMoney(derivedRemainingCredit, googleCloudBilling.currency)
+          : hasManualRemainingCredit
+            ? formatMoney(manualRemainingCredit, googleCloudBilling.currency)
+            : "Add console value",
+      },
+    ],
+    lastUpdatedAt: googleCloudBilling.lastUpdatedAt,
+    refreshPath: "/api/billing/google-cloud/refresh",
+  };
+}
+
+function buildOpenAiCard({
+  orgBilling,
+  appSpend,
+}: {
+  orgBilling: Awaited<ReturnType<typeof getOpenAiBillingSnapshot>>;
+  appSpend: ReturnType<typeof getAppTrackedOpenAiSpend>;
+}): BillingCard {
+  const useOrgFallback = !appSpend.lastUpdatedAt && !orgBilling.error;
+  const status = orgBilling.error?.includes("OPENAI_ADMIN_KEY")
+    ? "setup-needed"
+    : orgBilling.error
+      ? "error"
+      : "ready";
+
+  return {
+    id: "openai",
+    title: "OpenAI",
+    titleSuffix: null,
+    scopeLabel: useOrgFallback
+      ? "Showing whole-organization costs until app run tracking starts."
+      : "App-tracked from contact enrichment runs.",
+    status,
+    statusLabel: orgBilling.error ? (status === "setup-needed" ? "Setup needed" : "Issue") : "Live",
+    summary: orgBilling.error
+      ? "Org costs API is unavailable right now."
+      : useOrgFallback
+        ? "New enrichment runs will switch this card over to app-tracked spend."
+        : `Org month to date: ${formatMoney(orgBilling.monthToDateCost, orgBilling.currency)}.`,
+    metrics: [
+      {
+        label: useOrgFallback ? "Month to date" : "App MTD",
+        value: formatMoney(
+          useOrgFallback ? orgBilling.monthToDateCost : appSpend.monthToDateCost,
+          useOrgFallback ? orgBilling.currency : appSpend.currency,
+        ),
+      },
+      {
+        label: useOrgFallback ? "Last 7 days" : "App 7 days",
+        value: formatMoney(
+          useOrgFallback ? orgBilling.last7DaysCost : appSpend.last7DaysCost,
+          useOrgFallback ? orgBilling.currency : appSpend.currency,
+        ),
+      },
+    ],
+    lastUpdatedAt: appSpend.lastUpdatedAt ?? orgBilling.lastUpdatedAt,
+    refreshPath: null,
+  };
+}
+
+export async function getBillingOverview({
+  runs = [],
+}: {
+  runs?: WorkflowRun[];
+}): Promise<BillingOverview> {
+  const [googleCloudBilling, openAiBilling] = await Promise.all([
+    getGoogleCloudBillingSnapshot(),
+    getOpenAiBillingSnapshot(),
+  ]);
+  const openAiAppSpend = getAppTrackedOpenAiSpend(runs);
+
+  return {
+    cards: [
+      buildTrialCreditsCard({ googleCloudBilling }),
+      buildOpenAiCard({
+        orgBilling: openAiBilling,
+        appSpend: openAiAppSpend,
+      }),
+    ],
+  };
+}
