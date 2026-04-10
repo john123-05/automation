@@ -4,9 +4,15 @@ import { serializeError } from "@/lib/sales-machine/utils";
 
 export const runtime = "nodejs";
 
+const STALE_JOB_MS = 10 * 60 * 1000; // 10 minutes — longer than maxDuration
+
 function latestRunningJob<T extends { status: string; updatedAt: string }>(jobs: T[]) {
   return jobs
-    .filter((job) => job.status === "running")
+    .filter((job) => {
+      if (job.status !== "running") return false;
+      // Treat jobs not updated for > 10 min as stale (Vercel function timed out)
+      return Date.now() - new Date(job.updatedAt).getTime() < STALE_JOB_MS;
+    })
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0] ?? null;
 }
 

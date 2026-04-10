@@ -19,6 +19,7 @@ import { mutateDb, readDb } from "@/lib/sales-machine/store";
 import { nowIso, serializeError } from "@/lib/sales-machine/utils";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 async function ensureGmailAccessToken(mailboxId: string) {
   const env = getEnv();
@@ -423,6 +424,14 @@ export async function GET(request: Request) {
       });
 
       for (const message of remoteMessages) {
+        // Skip messages sent FROM this mailbox — only process inbound replies.
+        const incoming = !message.fromAddress?.toLowerCase().includes(mailbox.email.toLowerCase());
+
+        if (!incoming) {
+          syncedThreads += 1;
+          continue;
+        }
+
         const result = await upsertInboundMessage({
           mailboxId: mailbox.id,
           remoteThreadId: message.externalThreadId,

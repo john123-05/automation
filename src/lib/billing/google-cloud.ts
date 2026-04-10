@@ -1,6 +1,7 @@
 import "server-only";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { unstable_cache } from "next/cache";
 import { BigQuery } from "@google-cloud/bigquery";
 import { getEnv } from "@/lib/env";
 import type { GoogleBillingSnapshot } from "@/lib/billing/types";
@@ -294,9 +295,22 @@ export async function refreshGoogleCloudBillingSnapshot(options?: {
   return snapshot;
 }
 
+// On Vercel (ephemeral), use Next.js Data Cache instead of the file-based cache to
+// avoid calling fetchGoogleCloudBillingSnapshot (and sending Telegram alerts) on every page load.
+const getHostedBillingSnapshot = unstable_cache(
+  fetchGoogleCloudBillingSnapshot,
+  ["google-cloud-billing"],
+  { revalidate: GOOGLE_CLOUD_BILLING_CACHE_TTL_MS / 1000, tags: ["google-cloud-billing"] },
+);
+
 export async function getGoogleCloudBillingSnapshot(options?: { forceRefresh?: boolean }) {
   if (options?.forceRefresh) {
     return refreshGoogleCloudBillingSnapshot();
+  }
+
+  if (isEphemeralHostedRuntime()) {
+    const snapshot = await getHostedBillingSnapshot();
+    return { ...snapshot, cacheExpiresAt: null };
   }
 
   const cached = await readGoogleCloudBillingCache();

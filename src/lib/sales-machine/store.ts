@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { unstable_cache, revalidateTag } from "next/cache";
 import { getBillingOverview } from "@/lib/billing/overview";
 import { getStorageMode } from "@/lib/env";
 import { ensureAgencySeedData } from "@/lib/sales-machine/agency-seeds";
@@ -582,7 +583,7 @@ const emptyDb = (): SalesMachineDb => ({
   monthlyReports: [],
 });
 
-let mutationQueue = Promise.resolve();
+let mutationQueue: Promise<SalesMachineDb | null> = Promise.resolve(null);
 
 function isSupabaseNativeRunKind(kind: WorkflowRun["kind"]) {
   return supabaseNativeRunKinds.has(kind);
@@ -1979,6 +1980,11 @@ async function readSupabaseDb() {
   });
 }
 
+const getCachedSupabaseDb = unstable_cache(readSupabaseDb, ["sales-db"], {
+  revalidate: 5,
+  tags: ["sales-db"],
+});
+
 function isOutreachStorageFallbackError(error: unknown) {
   const message =
     error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
@@ -1998,8 +2004,13 @@ async function syncTable<Row extends { id: string }>(
 ) {
   const client = getSupabaseAdminClient();
 
-  if (afterRows.length > 0) {
-    const { error } = await client.from(tableName).upsert(afterRows, {
+  // Deduplicate by id — keeps last occurrence. Prevents "ON CONFLICT DO UPDATE
+  // command cannot affect row a second time" when seed functions produce duplicate
+  // entries within the same state snapshot.
+  const deduped = [...new Map(afterRows.map((row) => [row.id, row])).values()];
+
+  if (deduped.length > 0) {
+    const { error } = await client.from(tableName).upsert(deduped, {
       onConflict: "id",
     });
 
@@ -2018,7 +2029,7 @@ async function syncTable<Row extends { id: string }>(
     }
   }
 
-  const afterIds = new Set(afterRows.map((row) => row.id));
+  const afterIds = new Set(deduped.map((row) => row.id));
   const removedIds = beforeRows.map((row) => row.id).filter((id) => !afterIds.has(id));
 
   if (removedIds.length > 0) {
@@ -2247,7 +2258,7 @@ async function writeSupabaseDb(before: SalesMachineDb, after: SalesMachineDb) {
 export async function readDb() {
   if (getStorageMode() === "supabase") {
     try {
-      return await readSupabaseDb();
+      return await getCachedSupabaseDb();
     } catch (error) {
       console.warn(
         "Supabase read failed. Falling back to local storage.",
@@ -2262,8 +2273,12 @@ export async function readDb() {
 }
 
 export async function mutateDb<T>(mutator: (db: SalesMachineDb) => Promise<T> | T) {
-  const task = mutationQueue.then(async () => {
-    const before = await readDb();
+  const task = mutationQueue.then(async (prevState) => {
+    // Reuse the state from the previous chained mutation to avoid stale cache reads.
+    // Without this, unstable_cache may return an older snapshot within the same
+    // serverless invocation even after revalidateTag, causing "Step not found" errors
+    // and ON CONFLICT upsert failures when two mutations happen in quick succession.
+    const before = prevState ?? await readDb();
     const next = structuredClone(before) as SalesMachineDb;
     ensureOutreachSeedData(next);
     const result = await mutator(next);
@@ -2271,7 +2286,7 @@ export async function mutateDb<T>(mutator: (db: SalesMachineDb) => Promise<T> | 
     if (getStorageMode() === "supabase") {
       try {
         await writeSupabaseDb(before, next);
-        await writeLocalDb(next);
+        revalidateTag("sales-db", { expire: 0 });
       } catch (error) {
         if (!isOutreachStorageFallbackError(error)) {
           throw error;
@@ -2283,15 +2298,15 @@ export async function mutateDb<T>(mutator: (db: SalesMachineDb) => Promise<T> | 
       await writeLocalDb(next);
     }
 
-    return result;
+    return { result, state: next };
   });
 
   mutationQueue = task.then(
-    () => undefined,
-    () => undefined,
+    ({ state }) => state,
+    () => null,
   );
 
-  return task;
+  return task.then(({ result }) => result);
 }
 
 function computeCampaignMetrics(db: SalesMachineDb): CampaignMetrics[] {

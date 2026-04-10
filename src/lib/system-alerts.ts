@@ -26,6 +26,10 @@ function isEphemeralHostedRuntime() {
   return Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT);
 }
 
+// In-memory throttle for ephemeral runtimes (Vercel). Resets per cold start but
+// prevents duplicate alerts within the same long-running function invocation.
+const inMemoryAlertSentAt = new Map<string, number>();
+
 async function readAlertCache(): Promise<AlertCache> {
   if (isEphemeralHostedRuntime()) {
     return {};
@@ -50,6 +54,13 @@ async function writeAlertCache(cache: AlertCache) {
 }
 
 async function shouldSendAlert(key: string, ttlMs: number) {
+  if (isEphemeralHostedRuntime()) {
+    const lastSent = inMemoryAlertSentAt.get(key) ?? 0;
+    if (Date.now() - lastSent < ttlMs) return false;
+    inMemoryAlertSentAt.set(key, Date.now());
+    return true;
+  }
+
   const cache = await readAlertCache();
   const lastSentAt = cache[key] ? new Date(cache[key]).getTime() : 0;
 

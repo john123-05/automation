@@ -32,36 +32,44 @@ export function LiveJobProgress({
 
   useEffect(() => {
     let active = true;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     async function load() {
+      let hasActiveJob = false;
+
       try {
         const response = await fetch("/api/progress", {
           method: "GET",
           cache: "no-store",
         });
 
-        if (!response.ok) {
-          return;
-        }
+        if (response.ok) {
+          const next = (await response.json()) as ProgressPayload;
 
-        const next = (await response.json()) as ProgressPayload;
-
-        if (active) {
-          setPayload(next);
+          if (active) {
+            setPayload(next);
+            hasActiveJob = kind === "search" ? !!next.search : !!next.enrichment;
+          }
         }
       } catch {
         // Ignore transient polling issues.
       }
+
+      if (active) {
+        timeoutId = setTimeout(load, hasActiveJob ? 2000 : 10000);
+      }
     }
 
     void load();
-    const interval = window.setInterval(load, 2000);
 
     return () => {
       active = false;
-      window.clearInterval(interval);
+
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId);
+      }
     };
-  }, []);
+  }, [kind]);
 
   const job = kind === "search" ? payload?.search : payload?.enrichment;
 

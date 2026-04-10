@@ -125,14 +125,12 @@ export function getProviderStatuses(): ProviderStatus[] {
           : "Using local JSON storage until Supabase env vars are connected.",
     },
     {
-      label: "Gmail OAuth",
-      connected: Boolean(
-        env.googleOauthClientId && env.googleOauthClientSecret && env.googleOauthRedirectUri,
-      ),
+      label: "Gmail OAuth (credentials only)",
+      connected: false,
       hint:
         env.googleOauthClientId && env.googleOauthClientSecret && env.googleOauthRedirectUri
-          ? "Mailboxes can connect through Google OAuth."
-          : "Add Google OAuth env vars before connecting Gmail mailboxes.",
+          ? "Google OAuth credentials are configured. Connect a Gmail mailbox under Outreach → Mailboxes."
+          : "Add GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, and GOOGLE_OAUTH_REDIRECT_URI to enable Gmail mailboxes.",
     },
   ];
 }

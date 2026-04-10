@@ -266,7 +266,7 @@ create table if not exists public.sales_machine_generated_sequences (
 
 create table if not exists public.sales_machine_connected_mailboxes (
   id text primary key,
-  provider text not null check (provider in ('gmail')),
+  provider text not null check (provider in ('gmail', 'smtp')),
   email text not null,
   display_name text,
   status text not null check (status in ('setup_needed', 'connected', 'error')),

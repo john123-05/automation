@@ -6,6 +6,7 @@ import { notifyServerIssue, notifyWarmupTrialExpiring } from "@/lib/system-alert
 import { serializeError } from "@/lib/sales-machine/utils";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 async function runInboxSync(origin: string) {
   const response = await fetch(new URL("/api/inbox/sync", origin), {
