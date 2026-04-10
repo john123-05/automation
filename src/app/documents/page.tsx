@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DocumentsShell } from "@/components/documents-shell";
+import { MobileDrawer } from "@/components/mobile-drawer";
 import { requireAppAccess } from "@/lib/app-auth";
 import { hasDocumentsAccess, isDocumentsAuthEnabled } from "@/lib/documents/auth";
 import { listAvailableDocuments } from "@/lib/documents/storage";
@@ -58,27 +59,63 @@ export default async function DocumentsPage({ searchParams }: DocumentsPageProps
   }));
 
   return (
-    <main className="mx-auto flex h-screen w-full max-w-[1700px] flex-col gap-6 overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
-      <section className="glass-panel rounded-[36px] px-6 py-6 sm:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-3">
+    <main className="mx-auto flex h-screen w-full max-w-[1700px] flex-col gap-4 overflow-x-hidden overflow-y-hidden px-4 py-4 sm:gap-6 sm:px-6 sm:py-6 lg:px-8">
+      <section className="glass-panel rounded-[26px] px-4 py-3.5 sm:rounded-[36px] sm:px-8 sm:py-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0 flex-1 space-y-2 sm:space-y-3">
+            <div className="hidden flex-wrap items-center gap-2.5 sm:flex sm:gap-3">
               <Link
                 href="/"
-                className="inline-flex items-center justify-center rounded-full border border-line bg-white/80 px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-white"
+                className="inline-flex items-center justify-center rounded-full border border-line bg-white/80 px-3 py-1.5 text-[11px] font-medium text-slate-900 transition hover:bg-white sm:px-4 sm:py-2 sm:text-sm"
               >
                 Back
               </Link>
-              <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Documents</p>
             </div>
-            <div>
-              <h1 className="text-[clamp(1.9rem,4vw,3.8rem)] font-semibold leading-[0.95] text-slate-950">
+
+            <div className="flex items-start justify-between gap-3">
+              <h1 className="min-w-0 text-[clamp(1.35rem,3vw,3.8rem)] font-semibold leading-[0.95] text-slate-950 sm:text-[clamp(1.9rem,4vw,3.8rem)]">
                 Private PDF vault
               </h1>
+
+              <div className="shrink-0 sm:hidden">
+                <MobileDrawer title="Vault controls">
+                  <div className="space-y-3">
+                    <Link
+                      href="/"
+                      className="inline-flex w-full items-center justify-center rounded-full border border-line bg-white px-4 py-3 text-sm font-medium text-slate-900 transition hover:bg-slate-50"
+                    >
+                      Back to dashboard
+                    </Link>
+                    <Link
+                      href="/workspace"
+                      className="inline-flex w-full items-center justify-center rounded-full border border-line bg-white px-4 py-3 text-sm font-medium text-slate-900 transition hover:bg-slate-50"
+                    >
+                      Workspace
+                    </Link>
+                    <Link
+                      href="/outreach"
+                      className="inline-flex w-full items-center justify-center rounded-full border border-line bg-white px-4 py-3 text-sm font-medium text-slate-900 transition hover:bg-slate-50"
+                    >
+                      Outreach
+                    </Link>
+                    {authEnabled && hasAccess ? (
+                      <form action="/api/documents/session" method="post">
+                        <input type="hidden" name="intent" value="logout" />
+                        <button
+                          type="submit"
+                          className="inline-flex w-full items-center justify-center rounded-full border border-line bg-white px-4 py-3 text-sm font-medium text-slate-900 transition hover:bg-slate-50"
+                        >
+                          Lock
+                        </button>
+                      </form>
+                    ) : null}
+                  </div>
+                </MobileDrawer>
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="hidden flex-wrap items-center gap-3 sm:flex">
             <Link
               href="/workspace"
               className="inline-flex items-center justify-center rounded-full border border-line bg-white/80 px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-white"
@@ -107,10 +144,14 @@ export default async function DocumentsPage({ searchParams }: DocumentsPageProps
       </section>
 
       {authEnabled && !hasAccess ? (
-        <section className="glass-panel mx-auto w-full max-w-[640px] rounded-[32px] p-6 sm:p-8">
-          <p className="text-sm uppercase tracking-[0.26em] text-slate-500">Protected access</p>
-          <h2 className="mt-3 text-3xl font-semibold text-slate-950">Unlock confidential PDFs</h2>
-          <p className="mt-3 text-sm leading-6 text-slate-600">
+        <section className="glass-panel mx-auto w-full max-w-[640px] rounded-[24px] p-4 sm:rounded-[32px] sm:p-8">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 sm:text-sm sm:tracking-[0.26em]">
+            Protected access
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-950 sm:mt-3 sm:text-3xl">
+            Unlock confidential PDFs
+          </h2>
+          <p className="mt-3 text-xs leading-6 text-slate-600 sm:text-sm">
             Enter the documents password to unlock the embedded viewer and download route.
           </p>
 
@@ -123,19 +164,19 @@ export default async function DocumentsPage({ searchParams }: DocumentsPageProps
                 name="password"
                 type="password"
                 autoComplete="current-password"
-                className="w-full rounded-[22px] border border-line bg-white/90 px-4 py-3 outline-none transition focus:border-slate-950"
+                className="w-full rounded-[18px] border border-line bg-white/90 px-4 py-3 outline-none transition focus:border-slate-950 sm:rounded-[22px]"
               />
             </label>
 
             {authError === "invalid_password" ? (
-              <div className="rounded-[22px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              <div className="rounded-[18px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 sm:rounded-[22px]">
                 The password was not correct. Try again.
               </div>
             ) : null}
 
             <button
               type="submit"
-              className="inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+              className="inline-flex items-center justify-center rounded-full bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 sm:px-5 sm:py-3"
             >
               Unlock documents
             </button>
@@ -146,10 +187,14 @@ export default async function DocumentsPage({ searchParams }: DocumentsPageProps
       {!authEnabled || hasAccess ? (
         <>
           {documents.length === 0 ? (
-            <section className="glass-panel rounded-[32px] p-6 sm:p-8">
-              <p className="text-sm uppercase tracking-[0.26em] text-slate-500">No documents found</p>
-              <h2 className="mt-3 text-3xl font-semibold text-slate-950">Nothing is loaded yet</h2>
-              <div className="mt-5 space-y-3 text-sm leading-6 text-slate-600">
+            <section className="glass-panel rounded-[24px] p-4 sm:rounded-[32px] sm:p-8">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 sm:text-sm sm:tracking-[0.26em]">
+                No documents found
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-950 sm:mt-3 sm:text-3xl">
+                Nothing is loaded yet
+              </h2>
+              <div className="mt-4 space-y-3 text-xs leading-6 text-slate-600 sm:mt-5 sm:text-sm">
                 <p>
                   Put the PDFs in <code>~/Downloads/Wichtige Dokumente</code>, or set
                   <code> DOCUMENTS_DIR</code> to a private folder outside <code>public/</code>.

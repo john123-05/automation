@@ -20,47 +20,47 @@ export function SearchLeadsForm({ language = "en" }: { language?: UiLanguage }) 
   const [maxLeads, setMaxLeads] = useState(30);
 
   return (
-    <form action={formAction} className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-2">
+    <form action={formAction} className="space-y-3 sm:space-y-4">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-700">{t(language, "niche")}</span>
+          <span className="text-xs font-medium text-slate-700 sm:text-sm">{t(language, "niche")}</span>
           <input
             name="niche"
             defaultValue="restaurants"
-            className="w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-slate-900"
+            className="w-full rounded-[18px] border border-line bg-white/80 px-3 py-2.5 text-sm outline-none transition focus:border-slate-900 sm:rounded-2xl sm:px-4 sm:py-3"
             placeholder="restaurants, dentists, gyms"
             required
           />
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-700">{t(language, "location")}</span>
+          <span className="text-xs font-medium text-slate-700 sm:text-sm">{t(language, "location")}</span>
           <input
             name="location"
             defaultValue="London, UK"
-            className="w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-slate-900"
+            className="w-full rounded-[18px] border border-line bg-white/80 px-3 py-2.5 text-sm outline-none transition focus:border-slate-900 sm:rounded-2xl sm:px-4 sm:py-3"
             placeholder="London, UK"
             required
           />
         </label>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-700">{t(language, "radiusMeters")}</span>
+          <span className="text-xs font-medium text-slate-700 sm:text-sm">{t(language, "radiusMeters")}</span>
           <input
             name="radiusMeters"
             type="number"
             min={100}
             max={50000}
             defaultValue={1500}
-            className="w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-slate-900"
+            className="w-full rounded-[18px] border border-line bg-white/80 px-3 py-2.5 text-sm outline-none transition focus:border-slate-900 sm:rounded-2xl sm:px-4 sm:py-3"
             required
           />
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-700">
+          <span className="text-xs font-medium text-slate-700 sm:text-sm">
             {searchMode === "exhaustive" ? t(language, "safetyCap") : t(language, "maxLeads")}
           </span>
           <input
@@ -72,15 +72,15 @@ export function SearchLeadsForm({ language = "en" }: { language?: UiLanguage }) 
             onChange={(event) => {
               setMaxLeads(Number(event.target.value));
             }}
-            className="w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-slate-900"
+            className="w-full rounded-[18px] border border-line bg-white/80 px-3 py-2.5 text-sm outline-none transition focus:border-slate-900 sm:rounded-2xl sm:px-4 sm:py-3"
             required
           />
         </label>
       </div>
 
-      <div className="rounded-[24px] border border-line bg-white/70 p-4">
+      <div className="rounded-[18px] border border-line bg-white/70 p-3 sm:rounded-[24px] sm:p-4">
         <input name="searchMode" type="hidden" value={searchMode} />
-        <label className="flex items-center gap-3 text-sm text-slate-700">
+        <label className="flex items-center gap-3 text-xs text-slate-700 sm:text-sm">
           <input
             type="checkbox"
             checked={searchMode === "exhaustive"}
@@ -102,7 +102,7 @@ export function SearchLeadsForm({ language = "en" }: { language?: UiLanguage }) 
         </label>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 pt-2">
+      <div className="flex flex-wrap items-center gap-2.5 pt-1 sm:gap-3 sm:pt-2">
         <SubmitButton
           idleLabel={
             searchMode === "exhaustive"
@@ -114,7 +114,7 @@ export function SearchLeadsForm({ language = "en" }: { language?: UiLanguage }) 
         <FormPendingIndicator label={t(language, "searchingGooglePlacesLong")} />
         {state.message ? (
           <p
-            className={`text-sm ${
+            className={`text-xs sm:text-sm ${
               state.status === "error" ? "text-danger" : "text-slate-700"
             }`}
           >

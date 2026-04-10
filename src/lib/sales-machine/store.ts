@@ -2331,6 +2331,46 @@ function computeCampaignMetrics(db: SalesMachineDb): CampaignMetrics[] {
   });
 }
 
+function getEmailMessageTimestamp(message: EmailMessage) {
+  return message.sentAt ?? message.createdAt;
+}
+
+function buildThreadSnippetFromMessage(message: EmailMessage) {
+  const source = message.bodyText?.trim() || message.subject.trim();
+  return source.replace(/\s+/g, " ").slice(0, 180) || null;
+}
+
+function hydrateEmailThreads(threads: EmailThread[], messages: EmailMessage[]) {
+  const latestMessageByThreadId = new Map<string, EmailMessage>();
+
+  for (const message of messages) {
+    const current = latestMessageByThreadId.get(message.threadId);
+    const nextTimestamp = getEmailMessageTimestamp(message);
+    const currentTimestamp = current ? getEmailMessageTimestamp(current) : null;
+
+    if (!currentTimestamp || nextTimestamp.localeCompare(currentTimestamp) > 0) {
+      latestMessageByThreadId.set(message.threadId, message);
+    }
+  }
+
+  return [...threads]
+    .map((thread) => {
+      const latestMessage = latestMessageByThreadId.get(thread.id);
+
+      if (!latestMessage) {
+        return thread;
+      }
+
+      return {
+        ...thread,
+        subject: latestMessage.subject?.trim() || thread.subject,
+        snippet: buildThreadSnippetFromMessage(latestMessage) ?? thread.snippet,
+        lastMessageAt: getEmailMessageTimestamp(latestMessage),
+      };
+    })
+    .sort((a, b) => b.lastMessageAt.localeCompare(a.lastMessageAt));
+}
+
 export async function getDashboardSnapshot(
   providerStatuses: DashboardSnapshot["providerStatuses"],
 ) {
@@ -2344,9 +2384,7 @@ export async function getDashboardSnapshot(
     b.discoveredAt.localeCompare(a.discoveredAt),
   );
   const runs = [...db.runs].sort((a, b) => b.startedAt.localeCompare(a.startedAt));
-  const emailThreads = [...db.emailThreads].sort((a, b) =>
-    b.lastMessageAt.localeCompare(a.lastMessageAt),
-  );
+  const emailThreads = hydrateEmailThreads(db.emailThreads, db.emailMessages);
 
   return {
     leads,
@@ -2395,7 +2433,7 @@ export async function getOutreachSnapshot(): Promise<OutreachSnapshot> {
   const generatedSequences = [...db.generatedSequences].sort((a, b) =>
     b.updatedAt.localeCompare(a.updatedAt),
   );
-  const emailThreads = [...db.emailThreads].sort((a, b) => b.lastMessageAt.localeCompare(a.lastMessageAt));
+  const emailThreads = hydrateEmailThreads(db.emailThreads, db.emailMessages);
   const opportunities = [...db.opportunities].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   const meetings = [...db.meetings].sort((a, b) => b.scheduledAt.localeCompare(a.scheduledAt));
   const proposalDocuments = [...db.proposalDocuments].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));

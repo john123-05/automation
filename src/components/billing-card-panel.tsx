@@ -47,13 +47,15 @@ export function BillingCardPanel({
 
   return (
     <>
-      <div className="glass-panel rounded-[28px] p-5">
+      <div className="glass-panel rounded-[24px] p-4 sm:rounded-[28px] sm:p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-sm uppercase tracking-[0.18em] text-muted">{title}</p>
+              <p className="text-xs uppercase tracking-[0.16em] text-muted sm:text-sm sm:tracking-[0.18em]">
+                {title}
+              </p>
               {titleSuffix ? (
-                <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500 sm:text-xs sm:tracking-[0.14em]">
                   {titleSuffix}
                 </p>
               ) : null}
@@ -63,7 +65,7 @@ export function BillingCardPanel({
                 onMouseLeave={() => setTooltipRect(null)}
                 onFocus={(event) => setTooltipRect(event.currentTarget.getBoundingClientRect())}
                 onBlur={() => setTooltipRect(null)}
-                className="inline-flex size-5 items-center justify-center rounded-full border border-line bg-white text-[11px] font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-700"
+                className="inline-flex size-4.5 items-center justify-center rounded-full border border-line bg-white text-[10px] font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-700 sm:size-5 sm:text-[11px]"
                 aria-label={`More info for ${title}`}
               >
                 i
@@ -96,23 +98,34 @@ export function BillingCardPanel({
                     }
                   }}
                   disabled={isRefreshing}
-                  className="inline-flex rounded-full border border-line bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex rounded-full border border-line bg-white px-2 py-1 text-[10px] font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-60 sm:px-2.5 sm:text-[11px]"
                 >
                   {isRefreshing ? "Refreshing..." : "Refresh"}
                 </button>
               ) : null}
             </div>
           </div>
-          <span className={`rounded-full px-3 py-1 text-xs font-medium ${billingStatusClasses(status)}`}>
+          <span
+            className={`rounded-full px-2.5 py-1 text-[10px] font-medium sm:px-3 sm:text-xs ${billingStatusClasses(
+              status,
+            )}`}
+          >
             {statusLabel}
           </span>
         </div>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        <div className="mt-4 grid gap-2.5 sm:mt-5 sm:gap-3 sm:grid-cols-2">
           {metrics.map((metric) => (
-            <div key={metric.label} className="rounded-[22px] border border-line bg-white/70 p-4">
-              <p className="text-xs uppercase tracking-[0.16em] text-muted">{metric.label}</p>
-              <p className="mt-3 text-2xl font-semibold text-slate-950">{metric.value}</p>
+            <div
+              key={metric.label}
+              className="rounded-[18px] border border-line bg-white/70 p-3 sm:rounded-[22px] sm:p-4"
+            >
+              <p className="text-[10px] uppercase tracking-[0.14em] text-muted sm:text-xs sm:tracking-[0.16em]">
+                {metric.label}
+              </p>
+              <p className="mt-2 text-xl font-semibold text-slate-950 sm:mt-3 sm:text-2xl">
+                {metric.value}
+              </p>
             </div>
           ))}
         </div>

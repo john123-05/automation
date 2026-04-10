@@ -34,14 +34,14 @@ export function EnrichLeadsForm({
   );
 
   return (
-    <form action={formAction} className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-2">
+    <form action={formAction} className="space-y-3 sm:space-y-4">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-700">{t(language, "scope")}</span>
+          <span className="text-xs font-medium text-slate-700 sm:text-sm">{t(language, "scope")}</span>
           <select
             name="scope"
             defaultValue={defaultScope}
-            className="w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-slate-900"
+            className="w-full rounded-[18px] border border-line bg-white/80 px-3 py-2.5 text-sm outline-none transition focus:border-slate-900 sm:rounded-2xl sm:px-4 sm:py-3"
           >
             <option value="run">{t(language, "onlyOneLeadSearchRun")}</option>
             <option value="all-pending">{t(language, "allPendingLeads")}</option>
@@ -49,11 +49,11 @@ export function EnrichLeadsForm({
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-700">{t(language, "leadSearchRun")}</span>
+          <span className="text-xs font-medium text-slate-700 sm:text-sm">{t(language, "leadSearchRun")}</span>
           <select
             name="sourceRunId"
             defaultValue={searchRunOptions[0]?.id ?? ""}
-            className="w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-slate-900"
+            className="w-full rounded-[18px] border border-line bg-white/80 px-3 py-2.5 text-sm outline-none transition focus:border-slate-900 sm:rounded-2xl sm:px-4 sm:py-3"
             disabled={searchRunOptions.length === 0}
           >
             {searchRunOptions.length ? (
@@ -69,21 +69,21 @@ export function EnrichLeadsForm({
         </label>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-700">{t(language, "batchSize")}</span>
+          <span className="text-xs font-medium text-slate-700 sm:text-sm">{t(language, "batchSize")}</span>
           <input
             name="batchSize"
             type="number"
             min={1}
             max={50}
             defaultValue={10}
-            className="w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-slate-900"
+            className="w-full rounded-[18px] border border-line bg-white/80 px-3 py-2.5 text-sm outline-none transition focus:border-slate-900 sm:rounded-2xl sm:px-4 sm:py-3"
             required
           />
         </label>
 
-        <label className="flex items-center gap-3 rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm text-slate-700">
+        <label className="flex items-center gap-3 rounded-[18px] border border-line bg-white/70 px-3 py-2.5 text-xs text-slate-700 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm">
           <input
             name="includePreviouslyFailed"
             type="checkbox"
@@ -93,8 +93,8 @@ export function EnrichLeadsForm({
         </label>
       </div>
 
-      <div className="rounded-[24px] border border-line bg-white/70 p-4">
-        <label className="flex items-start gap-3 text-sm text-slate-700">
+      <div className="rounded-[18px] border border-line bg-white/70 p-3 sm:rounded-[24px] sm:p-4">
+        <label className="flex items-start gap-3 text-xs text-slate-700 sm:text-sm">
           <input
             name="allowOpenAiSecondPass"
             type="checkbox"
@@ -106,7 +106,7 @@ export function EnrichLeadsForm({
         </label>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 pt-2">
+      <div className="flex flex-wrap items-center gap-2.5 pt-1 sm:gap-3 sm:pt-2">
         <SubmitButton
           idleLabel={t(language, "runContactEnrichment")}
           pendingLabel={t(language, "runningGeminiResearch")}
@@ -114,7 +114,7 @@ export function EnrichLeadsForm({
         <FormPendingIndicator label={`Working through ${defaultRunLabel}...`} />
         {state.message ? (
           <p
-            className={`text-sm ${
+            className={`text-xs sm:text-sm ${
               state.status === "error" ? "text-danger" : "text-slate-700"
             }`}
           >

@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { deleteRunAction } from "@/app/actions";
 import { BillingCardPanel } from "@/components/billing-card-panel";
+import { InboxAutoSync } from "@/components/inbox-auto-sync";
 import { DashboardInboxPreview } from "@/components/dashboard-inbox-preview";
 import { EmailWarmupCard } from "@/components/email-warmup-card";
 import { EnrichLeadsForm } from "@/components/enrich-leads-form";
+import { MobileDrawer } from "@/components/mobile-drawer";
 import { MobileQuickActionsBar } from "@/components/mobile-quick-actions-bar";
+import { MobileStickyHero } from "@/components/mobile-sticky-hero";
 import { QuickAddCompanyModal } from "@/components/quick-add-company-modal";
 import { QuickAddContactModal } from "@/components/quick-add-contact-modal";
 import { RunHistoryPreview } from "@/components/run-history-preview";
@@ -15,7 +18,7 @@ import { requireAppAccess } from "@/lib/app-auth";
 import { t } from "@/lib/copy";
 import { listWarmupAccounts } from "@/lib/email-warmup-server";
 import { normalizeEnvValue } from "@/lib/env-shared";
-import { getProviderStatuses, getStorageMode } from "@/lib/env";
+import { getEnv, getProviderStatuses, getStorageMode } from "@/lib/env";
 import { getDashboardSnapshot } from "@/lib/sales-machine/store";
 import { probeSupabaseTable, salesMachineTables } from "@/lib/sales-machine/supabase";
 import type { Contact, Lead, RunKind, RunStatus, WorkflowRun } from "@/lib/sales-machine/types";
@@ -83,9 +86,11 @@ function StatCard({
   detail: string;
 }) {
   return (
-    <div className="glass-panel rounded-[24px] p-4">
-      <p className="text-sm uppercase tracking-[0.18em] text-muted">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-slate-950">{value}</p>
+    <div className="glass-panel rounded-[20px] p-3 sm:rounded-[24px] sm:p-4">
+      <p className="text-[10px] uppercase tracking-[0.16em] text-muted sm:text-sm sm:tracking-[0.18em]">
+        {label}
+      </p>
+      <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{value}</p>
       {detail ? <p className="mt-2 text-sm text-slate-600">{detail}</p> : null}
     </div>
   );
@@ -158,20 +163,23 @@ function RunCard({ run }: { run: WorkflowRun }) {
 
 function LeadCard({ lead, contacts }: { lead: Lead; contacts: Contact[] }) {
   return (
-    <details id={`lead-${lead.id}`} className="glass-panel rounded-[28px] p-5 scroll-mt-24">
+    <details
+      id={`lead-${lead.id}`}
+      className="glass-panel rounded-[22px] p-4 scroll-mt-24 sm:rounded-[28px] sm:p-5"
+    >
       <summary className="cursor-pointer list-none">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-lg font-semibold text-slate-950">{lead.companyName}</h3>
+              <h3 className="text-base font-semibold text-slate-950 sm:text-lg">{lead.companyName}</h3>
               <span
-                className={`rounded-full px-3 py-1 text-xs font-medium ${statusClasses(lead.stage)}`}
+                className={`rounded-full px-2.5 py-1 text-[10px] font-medium sm:px-3 sm:text-xs ${statusClasses(lead.stage)}`}
               >
                 {lead.stage}
               </span>
             </div>
-            <p className="text-sm text-slate-600">{lead.address}</p>
-            <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+            <p className="text-xs text-slate-600 sm:text-sm">{lead.address}</p>
+            <div className="flex flex-wrap gap-1.5 text-[11px] text-slate-500 sm:gap-2 sm:text-xs">
               <span>{lead.niche}</span>
               <span>•</span>
               <span>{lead.locationLabel}</span>
@@ -180,7 +188,7 @@ function LeadCard({ lead, contacts }: { lead: Lead; contacts: Contact[] }) {
             </div>
           </div>
 
-          <div className="text-right text-sm text-slate-600">
+          <div className="text-right text-xs text-slate-600 sm:text-sm">
             <p>Updated {formatDateTime(lead.updatedAt)}</p>
             <p className="mt-1">
               {lead.websiteUri ? (
@@ -195,10 +203,12 @@ function LeadCard({ lead, contacts }: { lead: Lead; contacts: Contact[] }) {
         </div>
       </summary>
 
-      <div className="mt-5 grid gap-4 border-t border-line pt-4 xl:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-[24px] border border-line bg-white/70 p-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-muted">Lead context</p>
-          <div className="mt-3 space-y-2 text-sm text-slate-700">
+      <div className="mt-4 grid gap-3 border-t border-line pt-3 sm:mt-5 sm:gap-4 sm:pt-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-[18px] border border-line bg-white/70 p-3 sm:rounded-[24px] sm:p-4">
+          <p className="text-[10px] uppercase tracking-[0.16em] text-muted sm:text-xs sm:tracking-[0.18em]">
+            Lead context
+          </p>
+          <div className="mt-2.5 space-y-1.5 text-xs text-slate-700 sm:mt-3 sm:space-y-2 sm:text-sm">
             <p>
               <span className="font-medium text-slate-900">Website:</span>{" "}
               {lead.websiteUri ? (
@@ -224,28 +234,35 @@ function LeadCard({ lead, contacts }: { lead: Lead; contacts: Contact[] }) {
           </div>
 
           {lead.researchSummary ? (
-            <div className="mt-4 rounded-2xl bg-accent-soft px-4 py-3 text-sm text-slate-800">
+            <div className="mt-3 rounded-[18px] bg-accent-soft px-3 py-2.5 text-xs text-slate-800 sm:mt-4 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm">
               {lead.researchSummary}
             </div>
           ) : null}
         </div>
 
-        <div className="rounded-[24px] border border-line bg-white/70 p-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-muted">Contacts</p>
-          <div className="mt-3 space-y-3">
+        <div className="rounded-[18px] border border-line bg-white/70 p-3 sm:rounded-[24px] sm:p-4">
+          <p className="text-[10px] uppercase tracking-[0.16em] text-muted sm:text-xs sm:tracking-[0.18em]">
+            Contacts
+          </p>
+          <div className="mt-2.5 space-y-2.5 sm:mt-3 sm:space-y-3">
             {contacts.length ? (
               contacts.map((contact) => (
-                <div key={contact.id} className="rounded-2xl border border-line bg-white px-4 py-3">
+                <div
+                  key={contact.id}
+                  className="rounded-[18px] border border-line bg-white px-3 py-2.5 sm:rounded-2xl sm:px-4 sm:py-3"
+                >
                   <div className="flex items-center justify-between gap-2">
                     <div>
-                      <p className="font-medium text-slate-900">{contact.name}</p>
-                      <p className="text-sm text-slate-600">{contact.title ?? "Unknown role"}</p>
+                      <p className="text-sm font-medium text-slate-900">{contact.name}</p>
+                      <p className="text-xs text-slate-600 sm:text-sm">
+                        {contact.title ?? "Unknown role"}
+                      </p>
                     </div>
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-700 sm:px-3 sm:text-xs">
                       {contact.confidence}
                     </span>
                   </div>
-                  <div className="mt-3 grid gap-2 text-sm text-slate-700">
+                  <div className="mt-2.5 grid gap-1.5 text-xs text-slate-700 sm:mt-3 sm:gap-2 sm:text-sm">
                     <p>Email: {contact.email ?? "NA"}</p>
                     <p>LinkedIn: {contact.linkedin ?? "NA"}</p>
                     <p>Instagram: {contact.instagram ?? "NA"}</p>
@@ -255,7 +272,7 @@ function LeadCard({ lead, contacts }: { lead: Lead; contacts: Contact[] }) {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-slate-600">
+              <p className="text-xs text-slate-600 sm:text-sm">
                 No contacts saved yet. Run enrichment to research likely decision-makers.
               </p>
             )}
@@ -292,6 +309,7 @@ type DashboardNotice = {
 export default async function Home() {
   await requireAppAccess("/");
   const { language, theme } = await getUiSettings();
+  const env = getEnv();
   const snapshot = await getDashboardSnapshot(getProviderStatuses());
   const warmupAccounts = await listWarmupAccounts();
   const displayedInboxThreads = snapshot.emailThreads.slice(0, 20);
@@ -368,78 +386,187 @@ export default async function Home() {
     }
   }
 
+  const dashboardMenuTitle = language === "de" ? "Dashboard-Menü" : "Dashboard menu";
+  const apiLabel = language === "de" ? "APIs" : "APIs";
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[1500px] flex-col gap-8 px-4 py-6 pb-28 sm:px-6 lg:px-8 lg:pb-6">
-      <section className="glass-panel relative overflow-hidden rounded-[36px] px-6 py-8 sm:px-8">
-        <div className="absolute inset-y-0 right-0 hidden w-1/3 bg-[radial-gradient(circle_at_center,rgba(17,100,102,0.18),transparent_72%)] lg:block" />
-        <div className="relative">
-          <div className="w-full max-w-[980px]">
-            <h1 className="mt-2 text-[clamp(1.65rem,4vw,3.9rem)] font-semibold leading-[0.98] text-slate-950">
-              {t(language, "leanMeanLeadFinderMachine")}
-            </h1>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Link
-                href="/workspace"
-                className={`inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition ${
-                  theme === "dark"
-                    ? "bg-slate-100 text-[#111315] hover:bg-white"
-                    : "bg-slate-950 text-white hover:bg-slate-800"
-                }`}
-              >
-                {t(language, "openContactTable")}
-              </Link>
-              <Link
-                href="/outreach"
-                className="inline-flex items-center justify-center rounded-full border border-line bg-white/80 px-5 py-3 text-sm font-medium text-slate-900 transition hover:bg-white"
-              >
-                {t(language, "outreachEngine")}
-              </Link>
-              <QuickAddCompanyModal
-                returnPath="/"
-                language={language}
-                triggerClassName="inline-flex items-center justify-center rounded-full bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
-              />
-              <QuickAddContactModal
-                leads={snapshot.leads}
-                returnPath="/"
-                language={language}
-                triggerClassName="inline-flex items-center justify-center rounded-full bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
-              />
-              <Link
-                href="/documents"
-                className="inline-flex items-center justify-center rounded-full border border-line bg-white/80 px-5 py-3 text-sm font-medium text-slate-900 transition hover:bg-white"
-              >
-                {t(language, "documentation")}
-              </Link>
-              <UniversalSearchLauncher
-                leads={snapshot.leads}
-                contacts={snapshot.contacts}
-                language={language}
-              />
-              <SettingsButton language={language} />
-            </div>
-
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <p className="mr-1 text-[11px] font-medium uppercase tracking-[0.22em] text-slate-500">
-                APIs
-              </p>
-              {snapshot.providerStatuses.map((provider) => (
-                <div
-                  key={provider.label}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white/75 px-2.5 py-1.5"
+      <InboxAutoSync
+        enabled={env.inboxAutoSyncEnabled}
+        intervalSeconds={env.inboxPollIntervalSeconds}
+      />
+      <MobileStickyHero>
+        <section
+          data-mobile-hero-shell
+          className="glass-panel relative overflow-hidden rounded-[28px] px-5 py-6 transition-[padding] duration-200 ease-out sm:rounded-[36px] sm:px-8 sm:py-8"
+        >
+          <div className="absolute inset-y-0 right-0 hidden w-1/3 bg-[radial-gradient(circle_at_center,rgba(17,100,102,0.18),transparent_72%)] lg:block" />
+          <div className="relative">
+            <div className="w-full max-w-[980px]">
+              <div className="flex items-start justify-between gap-3 sm:block">
+                <h1
+                  data-mobile-hero-title
+                  className="mt-1 text-[clamp(1.45rem,4vw,3.9rem)] font-semibold leading-[0.98] text-slate-950 transition-[font-size,line-height] duration-200 ease-out sm:mt-2 sm:text-[clamp(1.65rem,4vw,3.9rem)]"
                 >
-                  <span
-                    className={`status-dot ${
-                      provider.connected ? "bg-emerald-500" : "bg-amber-500"
-                    }`}
-                  />
-                  <p className="text-[11px] font-medium text-slate-900">{provider.label}</p>
+                  {t(language, "leanMeanLeadFinderMachine")}
+                </h1>
+                <div className="shrink-0 sm:hidden">
+                  <MobileDrawer title={dashboardMenuTitle}>
+                    <div className="space-y-6">
+                      <div className="space-y-3">
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                          {language === "de" ? "Schnellzugriffe" : "Quick actions"}
+                        </p>
+                        <div className="grid gap-3">
+                          <Link
+                            href="/workspace"
+                            className="inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+                          >
+                            {t(language, "openContactTable")}
+                          </Link>
+                          <Link
+                            href="/outreach"
+                            className="inline-flex items-center justify-center rounded-full border border-line bg-white px-5 py-3 text-sm font-medium text-slate-900 transition hover:bg-slate-50"
+                          >
+                            {t(language, "outreachEngine")}
+                          </Link>
+                          <QuickAddCompanyModal
+                            returnPath="/"
+                            language={language}
+                            triggerClassName="inline-flex items-center justify-center rounded-full bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+                          />
+                          <QuickAddContactModal
+                            leads={snapshot.leads}
+                            returnPath="/"
+                            language={language}
+                            triggerClassName="inline-flex items-center justify-center rounded-full bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+                          />
+                          <Link
+                            href="/documents"
+                            className="inline-flex items-center justify-center rounded-full border border-line bg-white px-5 py-3 text-sm font-medium text-slate-900 transition hover:bg-slate-50"
+                          >
+                            {t(language, "documentation")}
+                          </Link>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                          {language === "de" ? "Werkzeuge" : "Tools"}
+                        </p>
+                        <div className="flex flex-wrap gap-3">
+                          <UniversalSearchLauncher
+                            leads={snapshot.leads}
+                            contacts={snapshot.contacts}
+                            language={language}
+                            triggerLabel={t(language, "searchLeadsAndContacts")}
+                            triggerClassName="inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+                          />
+                          <SettingsButton language={language} />
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{apiLabel}</p>
+                        <div className="grid gap-2">
+                          {snapshot.providerStatuses.map((provider) => (
+                            <div
+                              key={provider.label}
+                              className="inline-flex items-center justify-between gap-3 rounded-[20px] border border-line bg-white px-4 py-3"
+                            >
+                              <div className="inline-flex items-center gap-2">
+                                <span
+                                  className={`status-dot ${
+                                    provider.connected ? "bg-emerald-500" : "bg-amber-500"
+                                  }`}
+                                />
+                                <p className="text-sm font-medium text-slate-900">{provider.label}</p>
+                              </div>
+                              <p className="text-xs text-slate-500">
+                                {provider.connected
+                                  ? language === "de"
+                                    ? "Verbunden"
+                                    : "Connected"
+                                  : language === "de"
+                                    ? "Prüfen"
+                                    : "Check"}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </MobileDrawer>
                 </div>
-              ))}
+              </div>
+
+              <div
+                data-mobile-hero-actions
+                className="mt-6 hidden flex-wrap items-center gap-3 sm:flex"
+              >
+                <Link
+                  href="/workspace"
+                  className={`inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition ${
+                    theme === "dark"
+                      ? "bg-slate-100 text-[#111315] hover:bg-white"
+                      : "bg-slate-950 text-white hover:bg-slate-800"
+                  }`}
+                >
+                  {t(language, "openContactTable")}
+                </Link>
+                <Link
+                  href="/outreach"
+                  className="inline-flex items-center justify-center rounded-full border border-line bg-white/80 px-5 py-3 text-sm font-medium text-slate-900 transition hover:bg-white"
+                >
+                  {t(language, "outreachEngine")}
+                </Link>
+                <QuickAddCompanyModal
+                  returnPath="/"
+                  language={language}
+                  triggerClassName="inline-flex items-center justify-center rounded-full bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+                />
+                <QuickAddContactModal
+                  leads={snapshot.leads}
+                  returnPath="/"
+                  language={language}
+                  triggerClassName="inline-flex items-center justify-center rounded-full bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+                />
+                <Link
+                  href="/documents"
+                  className="inline-flex items-center justify-center rounded-full border border-line bg-white/80 px-5 py-3 text-sm font-medium text-slate-900 transition hover:bg-white"
+                >
+                  {t(language, "documentation")}
+                </Link>
+                <UniversalSearchLauncher
+                  leads={snapshot.leads}
+                  contacts={snapshot.contacts}
+                  language={language}
+                />
+                <SettingsButton language={language} />
+              </div>
+
+              <div className="mt-3 hidden flex-wrap items-center gap-2 sm:mt-4 sm:flex">
+                <p className="mr-1 text-[11px] font-medium uppercase tracking-[0.22em] text-slate-500">
+                  {apiLabel}
+                </p>
+                {snapshot.providerStatuses.map((provider) => (
+                  <div
+                    key={provider.label}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white/75 px-2.5 py-1.5"
+                  >
+                    <span
+                      className={`status-dot ${
+                        provider.connected ? "bg-emerald-500" : "bg-amber-500"
+                      }`}
+                    />
+                    <p className="text-[11px] font-medium text-slate-900">{provider.label}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </MobileStickyHero>
 
       {notices.length ? (
         <section className="space-y-3">
@@ -470,15 +597,15 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <div className="contents xl:col-span-4 xl:grid xl:grid-cols-4 xl:gap-4">
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-5">
+        <div className="col-span-2 grid grid-cols-2 gap-3 sm:contents xl:col-span-4 xl:grid xl:grid-cols-4 xl:gap-4">
           <StatCard label="Leads" value={snapshot.stats.leadCount.toString()} detail="" />
           <StatCard label="Enriched" value={snapshot.stats.enrichedLeadCount.toString()} detail="" />
           <StatCard label={t(language, "contacts")} value={snapshot.stats.contactCount.toString()} detail="" />
           <StatCard label="Need Attention" value={snapshot.stats.failedLeadCount.toString()} detail="" />
         </div>
 
-        <div className="xl:col-span-1">
+        <div className="col-span-2 xl:col-span-1">
           <RunHistoryPreview runs={snapshot.runs} language={language}>
             <div className="space-y-4">
               {snapshot.runs.length ? (
@@ -493,46 +620,56 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-2">
-        <div className="glass-panel rounded-[32px] p-6">
-          <div className="mb-5">
-            <p className="text-sm uppercase tracking-[0.18em] text-muted">{t(language, "search")}</p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-950">{t(language, "findLeads")}</h2>
+      <section className="grid gap-4 xl:grid-cols-2 xl:gap-6">
+        <div className="glass-panel rounded-[24px] p-4 sm:rounded-[32px] sm:p-6">
+          <div className="mb-4 sm:mb-5">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-muted sm:text-sm sm:tracking-[0.18em]">
+              {t(language, "search")}
+            </p>
+            <h2 className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">
+              {t(language, "findLeads")}
+            </h2>
           </div>
           <SearchLeadsForm language={language} />
         </div>
 
-        <div className="glass-panel rounded-[32px] p-6">
-          <div className="mb-5">
-            <p className="text-sm uppercase tracking-[0.18em] text-muted">{t(language, "enrich")}</p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-950">{t(language, "enrichContacts")}</h2>
+        <div className="glass-panel rounded-[24px] p-4 sm:rounded-[32px] sm:p-6">
+          <div className="mb-4 sm:mb-5">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-muted sm:text-sm sm:tracking-[0.18em]">
+              {t(language, "enrich")}
+            </p>
+            <h2 className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">
+              {t(language, "enrichContacts")}
+            </h2>
           </div>
           <EnrichLeadsForm searchRunOptions={searchRunOptions} language={language} />
         </div>
       </section>
 
-      <section id="lead-workspace" className="glass-panel rounded-[32px] p-6">
+      <section id="lead-workspace" className="glass-panel rounded-[24px] p-4 sm:rounded-[32px] sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-sm uppercase tracking-[0.18em] text-muted">{t(language, "leadWorkspace")}</p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-muted sm:text-sm sm:tracking-[0.18em]">
+              {t(language, "leadWorkspace")}
+            </p>
+            <h2 className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">
               {t(language, "leadsAndContacts")}
             </h2>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <p className="text-sm text-slate-600">
+            <p className="text-xs text-slate-600 sm:text-sm">
               {t(language, "showingLatestThree")}
             </p>
             <Link
               href="/workspace"
-              className="inline-flex items-center justify-center rounded-full border border-line bg-white/70 px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-white"
+              className="inline-flex items-center justify-center rounded-full border border-line bg-white/70 px-3 py-1.5 text-[11px] font-medium text-slate-900 transition hover:bg-white sm:px-4 sm:py-2 sm:text-sm"
             >
               {t(language, "openTableView")}
             </Link>
           </div>
         </div>
 
-        <div className="mt-5 space-y-4">
+        <div className="mt-4 space-y-3 sm:mt-5 sm:space-y-4">
           {snapshot.leads.length ? (
             snapshot.leads.slice(0, 3).map((lead) => (
               <LeadCard
@@ -553,13 +690,13 @@ export default async function Home() {
         <QuickAddCompanyModal
           returnPath="/"
           language={language}
-          triggerClassName="inline-flex flex-1 items-center justify-center rounded-full bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+          triggerClassName="inline-flex min-w-0 flex-1 items-center justify-center whitespace-nowrap rounded-full border border-slate-300 bg-slate-950 px-2.5 py-2 text-[10px] font-medium tracking-[0.02em] text-white transition hover:bg-slate-800"
         />
         <QuickAddContactModal
           leads={snapshot.leads}
           returnPath="/"
           language={language}
-          triggerClassName="inline-flex flex-1 items-center justify-center rounded-full border border-line bg-white/85 px-4 py-3 text-sm font-medium text-slate-900 transition hover:bg-white"
+          triggerClassName="inline-flex min-w-0 flex-1 items-center justify-center whitespace-nowrap rounded-full border border-slate-300 bg-[#ece7db] px-2.5 py-2 text-[10px] font-medium tracking-[0.02em] text-slate-900 transition hover:bg-[#f3eee4]"
         />
       </MobileQuickActionsBar>
     </main>

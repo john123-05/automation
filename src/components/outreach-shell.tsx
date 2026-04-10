@@ -32,7 +32,7 @@ export function OutreachShell({
   children: ReactNode;
 }) {
   return (
-    <main className="mx-auto w-full max-w-[1680px] px-4 py-6 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-[1680px] overflow-x-hidden px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
       <div className="grid gap-5 xl:grid-cols-[auto_minmax(0,1fr)]">
         <aside className="hidden xl:sticky xl:top-6 xl:block xl:self-start">
           <OutreachSidebar
@@ -45,49 +45,71 @@ export function OutreachShell({
         </aside>
 
         <div className="space-y-6">
-          <section className="glass-panel rounded-[34px] px-6 py-5 sm:px-7">
+          <section className="glass-panel rounded-[28px] px-4 py-4 sm:rounded-[34px] sm:px-6 sm:py-5 sm:px-7">
             <div className="lg:hidden">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-3">
-                  <Link href="/" className="rounded-full border border-line bg-white/70 px-3 py-1.5 text-sm">
-                    Back
-                  </Link>
-                  <div className="min-w-0">
-                    <p className="truncate text-base font-semibold text-slate-900">{title}</p>
-                    {subtitle ? <p className="truncate text-sm text-slate-500">{subtitle}</p> : null}
-                  </div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-[1rem] font-semibold leading-tight text-slate-900">
+                    {title}
+                  </p>
+                  {subtitle ? <p className="mt-1 truncate text-xs text-slate-500">{subtitle}</p> : null}
                 </div>
-                <MobileDrawer title="Outreach navigation">
-                  <div className="space-y-3">
-                    {navItems.map((item) => (
+                <div className="shrink-0">
+                  <MobileDrawer title="Outreach navigation">
+                    <div className="space-y-3">
                       <Link
-                        key={item.id}
-                        href={item.href}
-                        className={`flex items-center justify-between rounded-[20px] border px-4 py-3 text-sm font-medium transition ${
-                          item.id === activeNav
-                            ? "border-slate-950 bg-slate-950 text-white"
-                            : "border-line bg-white text-slate-800 hover:bg-slate-50"
-                        }`}
+                        href="/"
+                        className="flex items-center justify-between rounded-[20px] border border-line bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-slate-50"
                       >
-                        <span>{item.label}</span>
-                        {item.id === activeNav ? <span className="text-xs uppercase tracking-[0.18em]">Active</span> : null}
+                        <span>Back to dashboard</span>
                       </Link>
-                    ))}
-                    <Link
-                      href="/workspace"
-                      className="flex items-center justify-between rounded-[20px] border border-line bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-slate-50"
-                    >
-                      <span>Workspace</span>
-                    </Link>
-                  </div>
-                </MobileDrawer>
+                      {navItems.map((item) => (
+                        <Link
+                          key={item.id}
+                          href={item.href}
+                          className={`flex items-center justify-between rounded-[20px] border px-4 py-3 text-sm font-medium transition ${
+                            item.id === activeNav
+                              ? "border-slate-950 bg-slate-950 text-white"
+                              : "border-line bg-white text-slate-800 hover:bg-slate-50"
+                          }`}
+                        >
+                          <span>{item.label}</span>
+                          {item.id === activeNav ? (
+                            <span className="text-xs uppercase tracking-[0.18em]">Active</span>
+                          ) : null}
+                        </Link>
+                      ))}
+                      <Link
+                        href="/workspace"
+                        className="flex items-center justify-between rounded-[20px] border border-line bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-slate-50"
+                      >
+                        <span>Workspace</span>
+                      </Link>
+                    </div>
+                  </MobileDrawer>
+                </div>
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="mt-3 flex items-center gap-2">
+                <Link
+                  href="/"
+                  className="inline-flex items-center justify-center rounded-full border border-line bg-white/75 px-3 py-1.5 text-[11px] font-medium text-slate-900"
+                >
+                  Back
+                </Link>
+                <Link
+                  href="/workspace"
+                  className="inline-flex items-center justify-center rounded-full border border-line bg-white/75 px-3 py-1.5 text-[11px] font-medium text-slate-900"
+                >
+                  Workspace
+                </Link>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-2.5">
                 {stats.map((stat) => (
-                  <div key={stat.label} className="rounded-[20px] border border-line bg-white/75 px-4 py-3">
-                    <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500">{stat.label}</p>
-                    <p className="mt-1 text-lg font-semibold tracking-tight text-slate-950">{stat.value}</p>
+                  <div key={stat.label} className="rounded-[18px] border border-line bg-white/75 px-3 py-2.5">
+                    <p className="text-[9px] uppercase tracking-[0.2em] text-slate-500">{stat.label}</p>
+                    <p className="mt-1 text-base font-semibold tracking-tight text-slate-950">{stat.value}</p>
                   </div>
                 ))}
               </div>

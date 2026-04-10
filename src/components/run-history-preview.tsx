@@ -19,16 +19,20 @@ export function RunHistoryPreview({
 
   return (
     <>
-      <div className="glass-panel rounded-[24px] p-4">
+      <div className="glass-panel rounded-[20px] p-3 sm:rounded-[24px] sm:p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-sm uppercase tracking-[0.18em] text-muted">{t(language, "runHistory")}</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-950">{runs.length}</p>
+            <p className="text-[10px] uppercase tracking-[0.16em] text-muted sm:text-sm sm:tracking-[0.18em]">
+              {t(language, "runHistory")}
+            </p>
+            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">
+              {runs.length}
+            </p>
           </div>
           <button
             type="button"
             onClick={() => setIsOpen(true)}
-            className="inline-flex items-center justify-center rounded-full border border-line bg-white/80 px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-white"
+            className="inline-flex items-center justify-center rounded-full border border-line bg-white/80 px-3 py-1.5 text-[11px] font-medium text-slate-900 transition hover:bg-white sm:px-4 sm:py-2 sm:text-sm"
           >
             {t(language, "expand")}
           </button>

@@ -180,13 +180,88 @@ function TableCard({
   children: React.ReactNode;
 }>) {
   return (
-    <section className="glass-panel rounded-[32px] p-6">
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-        <h2 className="text-2xl font-semibold text-slate-950">{title}</h2>
-        {actions ? <div className="flex flex-wrap items-center gap-3">{actions}</div> : null}
+    <section className="glass-panel rounded-[24px] p-4 sm:rounded-[32px] sm:p-6">
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-3 sm:mb-5">
+        <h2 className="text-xl font-semibold text-slate-950 sm:text-2xl">{title}</h2>
+        {actions ? <div className="flex flex-wrap items-center gap-2 sm:gap-3">{actions}</div> : null}
       </div>
       {children}
     </section>
+  );
+}
+
+function MobileWorkspaceRecordCard({
+  record,
+  href,
+  selected,
+}: Readonly<{
+  record: Awaited<ReturnType<typeof buildWorkspaceCompanyRecords>>[number];
+  href: string;
+  selected: boolean;
+}>) {
+  return (
+    <Link
+      href={href}
+      className={`block rounded-[20px] border px-4 py-3 transition ${
+        selected ? "border-slate-950 bg-slate-950 text-white" : "border-line bg-white/80"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className={`text-sm font-semibold ${selected ? "text-white" : "text-slate-950"}`}>
+            {record.lead.companyName}
+          </p>
+          <p className={`mt-1 text-xs ${selected ? "text-white/75" : "text-slate-500"}`}>
+            {record.lead.niche} · {record.lead.locationLabel}
+          </p>
+        </div>
+        <span
+          className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium ${
+            selected ? "bg-white/15 text-white" : getWorkspaceStageClasses(record.stage)
+          }`}
+        >
+          {formatWorkspaceStageLabel(record.stage)}
+        </span>
+      </div>
+
+      <div className={`mt-3 grid gap-1.5 text-xs ${selected ? "text-white/85" : "text-slate-700"}`}>
+        <p>Service: {record.serviceAngle ? formatServiceLabel(record.serviceAngle) : "No service"}</p>
+        <p>Contacts: {record.contacts.length}</p>
+        <p>Campaign: {record.campaign?.name ?? "No campaign"}</p>
+        <p>Next: {record.crm?.nextAction ? formatNextActionLabel(record.crm.nextAction) : record.nextStepLabel ?? "None"}</p>
+        <p>Priority: {record.crm ? formatPriorityLabel(record.crm.priority) : "Medium"}</p>
+      </div>
+    </Link>
+  );
+}
+
+function MobileContactCard({
+  companyName,
+  contact,
+  preferred,
+}: Readonly<{
+  companyName: string;
+  contact: Awaited<ReturnType<typeof buildWorkspaceCompanyRecords>>[number]["contacts"][number];
+  preferred: boolean;
+}>) {
+  return (
+    <div className="rounded-[20px] border border-line bg-white/80 px-4 py-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-slate-950">{contact.name}</p>
+          <p className="mt-1 text-xs text-slate-500">{companyName}</p>
+        </div>
+        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-700">
+          {contact.confidence}
+        </span>
+      </div>
+
+      <div className="mt-3 grid gap-1.5 text-xs text-slate-700">
+        <p>Title: {contact.title ?? "NA"}</p>
+        <p>Email: {contact.email ?? "NA"}</p>
+        <p>Preferred: {preferred ? "Yes" : "No"}</p>
+      </div>
+    </div>
   );
 }
 
@@ -338,18 +413,20 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
   ] as const;
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[1680px] flex-col gap-6 px-4 py-6 pb-28 sm:px-6 lg:px-8 lg:pb-6">
-      <section className="glass-panel rounded-[36px] px-6 py-6 sm:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-3">
+    <main className="mx-auto flex min-h-screen w-full max-w-[1680px] overflow-x-hidden flex-col gap-5 px-4 py-5 pb-28 sm:gap-6 sm:px-6 sm:py-6 lg:px-8 lg:pb-6">
+      <section className="glass-panel rounded-[26px] px-4 py-4 sm:rounded-[36px] sm:px-8 sm:py-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex min-w-0 flex-wrap items-center gap-2.5 sm:gap-3">
             <Link
               href="/"
-              className="inline-flex items-center justify-center rounded-full border border-line bg-white/80 px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-white"
+              className="inline-flex items-center justify-center rounded-full border border-line bg-white/80 px-3 py-1.5 text-[11px] font-medium text-slate-900 transition hover:bg-white sm:px-4 sm:py-2 sm:text-sm"
             >
               Back
             </Link>
-            <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Workspace</p>
-            <p className="text-lg font-semibold text-slate-950">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 sm:text-sm sm:tracking-[0.28em]">
+              Workspace
+            </p>
+            <p className="text-base font-semibold text-slate-950 sm:text-lg">
               {activeSheet ? activeSheet.label : "CRM-first outreach hub"}
             </p>
           </div>
@@ -383,17 +460,17 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
             <QuickAddContactModal leads={leads} returnPath={returnPath} />
           </div>
 
-          <div className="flex items-center gap-3 lg:hidden">
-            <QuickAddCompanyModal
-              returnPath={returnPath}
-              triggerClassName="inline-flex items-center justify-center rounded-full bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
-            />
-            <QuickAddContactModal
-              leads={leads}
-              returnPath={returnPath}
-              triggerClassName="inline-flex items-center justify-center rounded-full border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-slate-900 transition hover:bg-white"
-            />
-            <MobileDrawer title="Workspace controls">
+          <div className="flex items-center gap-2 lg:hidden">
+            <Link
+              href="/documents"
+              className="inline-flex items-center justify-center rounded-full border border-line bg-white/80 px-3 py-1.5 text-[11px] font-medium text-slate-900 transition hover:bg-white"
+            >
+              Docs
+            </Link>
+            <MobileDrawer
+              title="Workspace controls"
+              className="inline-flex size-10 items-center justify-center rounded-full border border-line bg-white/80 text-slate-900 transition hover:bg-white"
+            >
               <form method="get" className="space-y-4">
                 {activeSheet ? <input type="hidden" name="sheet" value={activeSheet.key} /> : null}
                 <input type="hidden" name="tab" value={activeTab} />
@@ -588,38 +665,38 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
           })}
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
-          <div className="rounded-[22px] border border-line bg-white/75 p-4">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Companies</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-950">{kpis.companyCount}</p>
+        <div className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:gap-3 md:grid-cols-4 xl:grid-cols-8">
+          <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Companies</p>
+            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.companyCount}</p>
           </div>
-          <div className="rounded-[22px] border border-line bg-white/75 p-4">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Contacts</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-950">{kpis.contactCount}</p>
+          <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Contacts</p>
+            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.contactCount}</p>
           </div>
-          <div className="rounded-[22px] border border-line bg-white/75 p-4">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Campaigns</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-950">{kpis.campaignCount}</p>
+          <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Campaigns</p>
+            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.campaignCount}</p>
           </div>
-          <div className="rounded-[22px] border border-line bg-white/75 p-4">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Replies</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-950">{kpis.repliedCount}</p>
+          <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Replies</p>
+            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.repliedCount}</p>
           </div>
-          <div className="rounded-[22px] border border-line bg-white/75 p-4">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Booked</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-950">{kpis.bookedCount}</p>
+          <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Booked</p>
+            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.bookedCount}</p>
           </div>
-          <div className="rounded-[22px] border border-line bg-white/75 p-4">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Needs attention</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-950">{kpis.needsAttentionCount}</p>
+          <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Needs attention</p>
+            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.needsAttentionCount}</p>
           </div>
-          <div className="rounded-[22px] border border-line bg-white/75 p-4">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Opportunities</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-950">{kpis.openOpportunities}</p>
+          <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Opportunities</p>
+            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.openOpportunities}</p>
           </div>
-          <div className="rounded-[22px] border border-line bg-white/75 p-4">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Clients</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-950">{kpis.activeClients}</p>
+          <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Clients</p>
+            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.activeClients}</p>
           </div>
         </div>
       </section>
@@ -627,15 +704,59 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
         <div className="space-y-6">
           {activeTab === "pipeline" ? (
-            <section className="glass-panel rounded-[32px] p-5">
+            <section className="glass-panel rounded-[24px] p-4 sm:rounded-[32px] sm:p-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Pipeline</p>
-                  <h2 className="mt-2 text-2xl font-semibold text-slate-950">Outreach lifecycle by company</h2>
+                  <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-sm sm:tracking-[0.18em]">Pipeline</p>
+                  <h2 className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">
+                    Outreach lifecycle by company
+                  </h2>
                 </div>
               </div>
 
-              <div className="scroll-slim mt-6 overflow-x-auto">
+              <div className="mt-4 space-y-3 sm:hidden">
+                {pipelineGroups.map((group) => (
+                  <details
+                    key={group.stage}
+                    className="rounded-[20px] border border-line bg-white/80 p-3"
+                    open={group.records.length > 0 && group.records.some((record) => record.lead.id === selectedRecord?.lead.id)}
+                  >
+                    <summary className="cursor-pointer list-none">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-medium text-slate-950">{group.label}</p>
+                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] text-slate-600">
+                          {group.records.length}
+                        </span>
+                      </div>
+                    </summary>
+
+                    <div className="mt-3 space-y-2.5">
+                      {group.records.length ? (
+                        group.records.map((record) => (
+                          <MobileWorkspaceRecordCard
+                            key={record.lead.id}
+                            record={record}
+                            selected={selectedRecord?.lead.id === record.lead.id}
+                            href={buildWorkspaceHref({
+                              tab: activeTab,
+                              sheet: activeSheet?.key ?? null,
+                              q: query || null,
+                              view: savedView,
+                              leadId: record.lead.id,
+                            })}
+                          />
+                        ))
+                      ) : (
+                        <div className="rounded-[18px] border border-dashed border-line px-3 py-6 text-center text-xs text-slate-500">
+                          Empty
+                        </div>
+                      )}
+                    </div>
+                  </details>
+                ))}
+              </div>
+
+              <div className="scroll-slim mt-6 hidden overflow-x-auto sm:block">
                 <div className="flex min-w-max gap-4">
                   {pipelineGroups.map((group) => (
                     <section key={group.stage} className="w-[260px] rounded-[24px] border border-line bg-white/75 p-4">
@@ -753,7 +874,40 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                   Tick company rows below, then apply one bulk action.
                 </p>
 
-              <div className="scroll-slim overflow-x-auto rounded-[24px] border border-line bg-white/70">
+              <div className="space-y-3 sm:hidden">
+                {companyRecords.length ? (
+                  companyRecords.map((record) => (
+                    <div key={record.lead.id} className="space-y-2">
+                      <label className="inline-flex items-center gap-2 text-xs text-slate-600">
+                        <input
+                          type="checkbox"
+                          name="leadIds"
+                          value={record.lead.id}
+                          className="h-4 w-4 rounded border-line"
+                        />
+                        Select for bulk actions
+                      </label>
+                      <MobileWorkspaceRecordCard
+                        record={record}
+                        selected={selectedRecord?.lead.id === record.lead.id}
+                        href={buildWorkspaceHref({
+                          tab: activeTab,
+                          sheet: activeSheet?.key ?? null,
+                          q: query || null,
+                          view: savedView,
+                          leadId: record.lead.id,
+                        })}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-[18px] border border-dashed border-line px-4 py-8 text-center text-sm text-slate-600">
+                    No companies match this view yet.
+                  </div>
+                )}
+              </div>
+
+              <div className="scroll-slim hidden overflow-x-auto rounded-[24px] border border-line bg-white/70 sm:block">
                 <table className="min-w-[1300px] w-full text-left text-sm">
                   <thead className="bg-slate-950 text-white">
                     <tr>
@@ -853,7 +1007,28 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
               title="Contacts"
               actions={<QuickAddContactModal leads={leads} returnPath={returnPath} />}
             >
-              <div className="scroll-slim overflow-x-auto rounded-[24px] border border-line bg-white/70">
+              <div className="space-y-3 sm:hidden">
+                {companyRecords.flatMap((record) =>
+                  record.contacts.map((contact) => ({ record, contact })),
+                ).length ? (
+                  companyRecords
+                    .flatMap((record) => record.contacts.map((contact) => ({ record, contact })))
+                    .map(({ record, contact }) => (
+                      <MobileContactCard
+                        key={contact.id}
+                        companyName={record.lead.companyName}
+                        contact={contact}
+                        preferred={record.preferredContact?.id === contact.id}
+                      />
+                    ))
+                ) : (
+                  <div className="rounded-[18px] border border-dashed border-line px-4 py-8 text-center text-sm text-slate-600">
+                    No contacts in this view yet.
+                  </div>
+                )}
+              </div>
+
+              <div className="scroll-slim hidden overflow-x-auto rounded-[24px] border border-line bg-white/70 sm:block">
                 <table className="min-w-[1200px] w-full text-left text-sm">
                   <thead className="bg-slate-950 text-white">
                     <tr>
@@ -2438,12 +2613,12 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
       <MobileQuickActionsBar>
         <QuickAddCompanyModal
           returnPath={returnPath}
-          triggerClassName="inline-flex flex-1 items-center justify-center rounded-full bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+          triggerClassName="inline-flex min-w-0 flex-1 items-center justify-center whitespace-nowrap rounded-full border border-slate-300 bg-slate-950 px-2.5 py-2 text-[10px] font-medium tracking-[0.02em] text-white transition hover:bg-slate-800"
         />
         <QuickAddContactModal
           leads={leads}
           returnPath={returnPath}
-          triggerClassName="inline-flex flex-1 items-center justify-center rounded-full border border-line bg-white/85 px-4 py-3 text-sm font-medium text-slate-900 transition hover:bg-white"
+          triggerClassName="inline-flex min-w-0 flex-1 items-center justify-center whitespace-nowrap rounded-full border border-slate-300 bg-[#ece7db] px-2.5 py-2 text-[10px] font-medium tracking-[0.02em] text-slate-900 transition hover:bg-[#f3eee4]"
         />
       </MobileQuickActionsBar>
     </main>
