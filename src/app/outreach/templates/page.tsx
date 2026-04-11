@@ -33,7 +33,7 @@ export default async function OutreachTemplatesPage({
 
   return (
     <OutreachShell activeNav="templates" title="Templates" stats={getOutreachShellStats(snapshot)}>
-      <section className="glass-panel rounded-[34px] p-6">
+      <section className="glass-panel rounded-[28px] p-4 sm:rounded-[34px] sm:p-6">
         <TemplateServiceSwitcher
           initialServiceKey={selectedProfile?.serviceKey ?? null}
           serviceProfiles={snapshot.serviceProfiles.map((profile) => ({

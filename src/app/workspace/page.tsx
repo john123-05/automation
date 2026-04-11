@@ -665,7 +665,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
           })}
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:gap-3 md:grid-cols-4 xl:grid-cols-8">
+        <div className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:gap-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-8">
           <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
             <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Companies</p>
             <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.companyCount}</p>
@@ -701,7 +701,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
         </div>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_390px]">
         <div className="space-y-6">
           {activeTab === "pipeline" ? (
             <section className="glass-panel rounded-[24px] p-4 sm:rounded-[32px] sm:p-5">
@@ -714,7 +714,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                 </div>
               </div>
 
-              <div className="mt-4 space-y-3 sm:hidden">
+              <div className="mt-4 space-y-3 xl:hidden">
                 {pipelineGroups.map((group) => (
                   <details
                     key={group.stage}
@@ -756,7 +756,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                 ))}
               </div>
 
-              <div className="scroll-slim mt-6 hidden overflow-x-auto sm:block">
+              <div className="scroll-slim mt-6 hidden overflow-x-auto xl:block">
                 <div className="flex min-w-max gap-4">
                   {pipelineGroups.map((group) => (
                     <section key={group.stage} className="w-[260px] rounded-[24px] border border-line bg-white/75 p-4">
@@ -874,7 +874,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                   Tick company rows below, then apply one bulk action.
                 </p>
 
-              <div className="space-y-3 sm:hidden">
+              <div className="space-y-3 xl:hidden">
                 {companyRecords.length ? (
                   companyRecords.map((record) => (
                     <div key={record.lead.id} className="space-y-2">
@@ -907,7 +907,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                 )}
               </div>
 
-              <div className="scroll-slim hidden overflow-x-auto rounded-[24px] border border-line bg-white/70 sm:block">
+              <div className="scroll-slim hidden overflow-x-auto rounded-[24px] border border-line bg-white/70 xl:block">
                 <table className="min-w-[1300px] w-full text-left text-sm">
                   <thead className="bg-slate-950 text-white">
                     <tr>
@@ -1007,7 +1007,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
               title="Contacts"
               actions={<QuickAddContactModal leads={leads} returnPath={returnPath} />}
             >
-              <div className="space-y-3 sm:hidden">
+              <div className="space-y-3 xl:hidden">
                 {companyRecords.flatMap((record) =>
                   record.contacts.map((contact) => ({ record, contact })),
                 ).length ? (
@@ -1028,7 +1028,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                 )}
               </div>
 
-              <div className="scroll-slim hidden overflow-x-auto rounded-[24px] border border-line bg-white/70 sm:block">
+              <div className="scroll-slim hidden overflow-x-auto rounded-[24px] border border-line bg-white/70 xl:block">
                 <table className="min-w-[1200px] w-full text-left text-sm">
                   <thead className="bg-slate-950 text-white">
                     <tr>
@@ -1137,7 +1137,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
 
           {activeTab === "inbox" ? (
             <TableCard title="Inbox">
-              <div className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
+              <div className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]">
                 <div className="rounded-[24px] border border-line bg-white/75 p-4">
                   <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Thread list</p>
                   <div className="mt-4 space-y-3">

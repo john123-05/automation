@@ -129,11 +129,11 @@ export function DocumentsShell({
   return (
     <section
       className={`min-h-0 flex-1 grid gap-4 transition-all duration-200 sm:gap-5 ${
-        libraryExpanded ? "xl:grid-cols-[360px_minmax(0,1fr)]" : "xl:grid-cols-[72px_minmax(0,1fr)]"
+        libraryExpanded ? "lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[360px_minmax(0,1fr)]" : "lg:grid-cols-[72px_minmax(0,1fr)]"
       }`}
     >
       <aside
-        className={`glass-panel hidden min-h-0 overflow-hidden rounded-[32px] transition-all duration-200 xl:block ${
+        className={`glass-panel hidden min-h-0 overflow-hidden rounded-[32px] transition-all duration-200 lg:block ${
           libraryExpanded ? "p-4 sm:p-5" : "p-3"
         }`}
       >
@@ -178,7 +178,7 @@ export function DocumentsShell({
                 <h2 className="mt-2 text-2xl font-semibold text-slate-950">{documents.length} PDFs</h2>
               </div>
 
-              <div className="mt-5 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain pr-1 max-xl:max-h-[48vh] xl:max-h-[calc(100vh-18rem)]">
+              <div className="mt-5 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain pr-1 max-lg:max-h-[48vh] lg:max-h-[calc(100vh-18rem)]">
                 {documents.map((document) => {
                   const active = selectedDocument?.slug === document.slug;
 
@@ -327,7 +327,7 @@ export function DocumentsShell({
                 </div>
               </div>
 
-              <div className="mt-3 flex items-center gap-2 xl:hidden">
+              <div className="mt-3 flex items-center gap-2 lg:hidden">
                 <MobileDrawer title="Document library">
                   <div className="space-y-3">
                     <div>
@@ -424,7 +424,7 @@ export function DocumentsShell({
                 key={selectedDocument.slug}
                 src={`/api/documents/${selectedDocument.slug}`}
                 title={selectedDocument.title}
-                className="h-full min-h-[78vh] w-full rounded-[18px] border border-line bg-white sm:min-h-[78vh] sm:rounded-[24px] xl:min-h-0"
+                className="h-full min-h-[78vh] w-full rounded-[18px] border border-line bg-white sm:min-h-[78vh] sm:rounded-[24px] lg:min-h-0"
               />
             </div>
           </div>

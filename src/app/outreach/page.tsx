@@ -62,7 +62,7 @@ export default async function OutreachPage({ searchParams }: OutreachPageProps) 
           </div>
         </div>
 
-        <div className="mt-4 space-y-3 md:hidden">
+        <div className="mt-4 grid gap-3 lg:grid-cols-2 xl:hidden">
           {snapshot.campaigns.length ? (
             snapshot.campaigns.map((campaign) => {
               const metrics = snapshot.campaignMetrics.find((candidate) => candidate.campaignId === campaign.id);
@@ -121,7 +121,7 @@ export default async function OutreachPage({ searchParams }: OutreachPageProps) 
           )}
         </div>
 
-        <div className="mt-6 hidden overflow-x-auto rounded-[28px] border border-line bg-white/84 md:block">
+        <div className="mt-6 hidden overflow-x-auto rounded-[28px] border border-line bg-white/84 xl:block">
           <div className="min-w-[1120px]">
             <div className="grid grid-cols-[minmax(240px,2fr)_120px_110px_110px_110px_110px_140px_120px] gap-4 border-b border-line px-5 py-4 text-[11px] uppercase tracking-[0.2em] text-slate-500">
               <span>Name</span>
@@ -177,7 +177,7 @@ export default async function OutreachPage({ searchParams }: OutreachPageProps) 
           </div>
         </div>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:mt-5 lg:grid-cols-3 lg:gap-4">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:mt-5 lg:gap-4">
           <div className="rounded-[20px] border border-line bg-white/84 p-3.5 sm:rounded-[24px] sm:p-4">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Mailbox health</p>
             <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{mailboxOptions.length}</p>

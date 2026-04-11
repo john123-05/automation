@@ -71,7 +71,7 @@ export default async function CampaignSequencesPage({
         { label: "Replies", value: data.metrics.repliedCount.toString() },
       ]}
     >
-      <section className="glass-panel rounded-[34px] p-6">
+      <section className="glass-panel rounded-[28px] p-4 sm:rounded-[34px] sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm text-slate-600">
@@ -88,8 +88,8 @@ export default async function CampaignSequencesPage({
           <CampaignTabs campaignId={data.campaign.id} active="sequences" />
         </div>
 
-        <div className="mt-6 grid gap-6 xl:grid-cols-[260px_minmax(0,1fr)_minmax(320px,0.78fr)]">
-          <section className="rounded-[28px] border border-line bg-white/84 p-5">
+        <div className="mt-5 grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[260px_minmax(0,1fr)_minmax(320px,0.78fr)] xl:gap-6">
+          <section className="rounded-[24px] border border-line bg-white/84 p-4 sm:rounded-[28px] sm:p-5">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Campaign steps</p>
             <div className="mt-4 space-y-3">
               {data.steps.map((step) => {
@@ -118,7 +118,7 @@ export default async function CampaignSequencesPage({
             </div>
           </section>
 
-          <section className="rounded-[28px] border border-line bg-white/84 p-5">
+          <section className="rounded-[24px] border border-line bg-white/84 p-4 sm:rounded-[28px] sm:p-5">
             {selectedStep ? (
               <>
                 <div className="border-b border-line pb-4">
@@ -146,7 +146,7 @@ export default async function CampaignSequencesPage({
             )}
           </section>
 
-          <section className="rounded-[28px] border border-line bg-white/84 p-5">
+          <section className="rounded-[24px] border border-line bg-white/84 p-4 sm:rounded-[28px] sm:p-5 lg:col-span-2 xl:col-span-1">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Rendered preview</p>
             <div className="mt-4 rounded-[22px] border border-line bg-slate-50/80 p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">

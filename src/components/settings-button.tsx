@@ -8,7 +8,7 @@ export function SettingsButton({ language }: { language: UiLanguage }) {
       href="/settings"
       aria-label={t(language, "openSettings")}
       title={t(language, "settings")}
-      className="inline-flex size-11 items-center justify-center rounded-full border border-line bg-white/80 text-slate-900 transition hover:bg-white"
+      className="inline-flex size-11 items-center justify-center rounded-full border border-line bg-surface-strong text-foreground transition hover:opacity-90"
     >
       <svg viewBox="0 0 24 24" aria-hidden className="size-5">
         <path

@@ -88,18 +88,20 @@ export default async function OutreachInboxPage({ searchParams }: OutreachInboxP
 
   return (
     <OutreachShell activeNav="inbox" title="Inbox" stats={getOutreachShellStats(snapshot)}>
-      <section className="glass-panel rounded-[34px] p-6">
-        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-4">
+      <section className="glass-panel rounded-[28px] p-4 sm:rounded-[34px] sm:p-6">
+        <div className="flex flex-col gap-3 border-b border-line pb-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
           <div>
-            <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Operator inbox</p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 sm:text-sm">
+              Operator inbox
+            </p>
+            <h2 className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">
               Replies, thread state, and manual follow-up
             </h2>
           </div>
           <InboxSyncButton mailboxId={activeMailboxId} />
         </div>
 
-        <div className="mt-6 grid gap-5 xl:grid-cols-[240px_360px_minmax(0,1fr)]">
+        <div className="mt-5 grid gap-4 lg:grid-cols-[220px_300px_minmax(0,1fr)] xl:grid-cols-[240px_360px_minmax(0,1fr)] xl:gap-5">
           <aside className="space-y-5 rounded-[28px] border border-line bg-white/84 p-5">
             <div>
               <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Mailbox</p>
@@ -186,7 +188,7 @@ export default async function OutreachInboxPage({ searchParams }: OutreachInboxP
             </div>
           </aside>
 
-          <section className="rounded-[28px] border border-line bg-white/84 p-5">
+          <section className="rounded-[28px] border border-line bg-white/84 p-4 sm:p-5">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Thread list</p>
             <div className="mt-4 space-y-3">
               {filteredThreads.length ? (
@@ -235,14 +237,14 @@ export default async function OutreachInboxPage({ searchParams }: OutreachInboxP
             </div>
           </section>
 
-          <section className="rounded-[28px] border border-line bg-white/84 p-5">
+          <section className="rounded-[28px] border border-line bg-white/84 p-4 sm:p-5">
             {selectedThread ? (
               <>
                 <div className="border-b border-line pb-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Thread detail</p>
-                      <h2 className="mt-2 text-2xl font-semibold text-slate-950">{selectedThread.subject}</h2>
+                      <h2 className="mt-2 text-xl font-semibold text-slate-950 sm:text-2xl">{selectedThread.subject}</h2>
                     </div>
                     {selectedStateRecord ? (
                       <OutreachStateSelector

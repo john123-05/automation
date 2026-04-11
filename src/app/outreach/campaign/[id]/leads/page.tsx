@@ -73,7 +73,7 @@ export default async function CampaignLeadsPage({
         { label: "Replies / Booked", value: `${data.metrics.repliedCount} / ${data.metrics.bookedCount}` },
       ]}
     >
-      <section className="glass-panel rounded-[34px] p-6">
+      <section className="glass-panel rounded-[28px] p-4 sm:rounded-[34px] sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3">
             <span
@@ -99,8 +99,8 @@ export default async function CampaignLeadsPage({
           <CampaignTabs campaignId={data.campaign.id} active="leads" />
         </div>
 
-        <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.8fr)]">
-          <div className="rounded-[28px] border border-line bg-white/84 p-5">
+        <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.95fr)] xl:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.8fr)] xl:gap-6">
+          <div className="rounded-[24px] border border-line bg-white/84 p-4 sm:rounded-[28px] sm:p-5">
             <div className="border-b border-line pb-4">
               <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Campaign leads</p>
             </div>
@@ -155,10 +155,10 @@ export default async function CampaignLeadsPage({
             </div>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-5 xl:space-y-6">
             {selectedRecord ? (
               <>
-                <section className="rounded-[28px] border border-line bg-white/84 p-5">
+                <section className="rounded-[24px] border border-line bg-white/84 p-4 sm:rounded-[28px] sm:p-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Selected lead</p>
@@ -178,8 +178,8 @@ export default async function CampaignLeadsPage({
                     ) : null}
                   </div>
 
-                  <div className="mt-5 grid gap-4 md:grid-cols-2">
-                    <div className="rounded-[22px] border border-line bg-slate-50/80 p-4">
+                  <div className="mt-5 grid gap-3 md:grid-cols-2 md:gap-4">
+                    <div className="rounded-[20px] border border-line bg-slate-50/80 p-3.5 sm:rounded-[22px] sm:p-4">
                       <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Finding</p>
                       <p className="mt-2 text-sm font-medium text-slate-900">
                         {selectedRecord.finding?.summary ?? "No issue selected yet"}
@@ -188,7 +188,7 @@ export default async function CampaignLeadsPage({
                         {selectedRecord.finding?.recognizableReason ?? "No recognizable reason yet."}
                       </p>
                     </div>
-                    <div className="rounded-[22px] border border-line bg-slate-50/80 p-4">
+                    <div className="rounded-[20px] border border-line bg-slate-50/80 p-3.5 sm:rounded-[22px] sm:p-4">
                       <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Context</p>
                       <p className="mt-2 text-sm text-slate-700">
                         {selectedRecord.lead?.address ?? "No address"} · updated{" "}
@@ -205,7 +205,7 @@ export default async function CampaignLeadsPage({
                     </div>
                   </div>
 
-                  <div className="mt-5 rounded-[22px] border border-line bg-white p-4">
+                  <div className="mt-5 rounded-[20px] border border-line bg-white p-3.5 sm:rounded-[22px] sm:p-4">
                     <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Variable set</p>
                     <div className="mt-3 grid gap-3 sm:grid-cols-2">
                       {Object.entries(selectedRecord.variables?.variables ?? {}).map(([key, value]) => (
@@ -220,7 +220,7 @@ export default async function CampaignLeadsPage({
                   </div>
                 </section>
 
-                <section className="rounded-[28px] border border-line bg-white/84 p-5">
+                <section className="rounded-[24px] border border-line bg-white/84 p-4 sm:rounded-[28px] sm:p-5">
                   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Lead override editor</p>

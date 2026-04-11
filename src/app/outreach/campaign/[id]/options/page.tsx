@@ -73,7 +73,7 @@ export default async function CampaignOptionsPage({ params }: CampaignOptionsPag
       subtitle={formatServiceLabel(data.campaign.serviceKey)}
       stats={getOutreachShellStats(data.snapshot)}
     >
-      <section className="glass-panel rounded-[34px] p-6">
+      <section className="glass-panel rounded-[28px] p-4 sm:rounded-[34px] sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-slate-600">
             Mailbox assignment, source details, and safety controls live here.
@@ -90,9 +90,9 @@ export default async function CampaignOptionsPage({ params }: CampaignOptionsPag
           <CampaignTabs campaignId={data.campaign.id} active="options" />
         </div>
 
-        <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] xl:gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           <div className="space-y-6">
-            <section className="rounded-[28px] border border-line bg-white/84 p-5">
+            <section className="rounded-[24px] border border-line bg-white/84 p-4 sm:rounded-[28px] sm:p-5">
               <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Mailbox assignment</p>
               <div className="mt-4">
                 {mailboxOptions.length ? (
@@ -112,7 +112,7 @@ export default async function CampaignOptionsPage({ params }: CampaignOptionsPag
               </div>
             </section>
 
-            <section className="rounded-[28px] border border-line bg-white/84 p-5">
+            <section className="rounded-[24px] border border-line bg-white/84 p-4 sm:rounded-[28px] sm:p-5">
               <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Campaign source</p>
               <div className="mt-4 space-y-3 text-sm text-slate-700">
                 <div className="flex items-center justify-between gap-4">
@@ -139,7 +139,7 @@ export default async function CampaignOptionsPage({ params }: CampaignOptionsPag
             </section>
           </div>
 
-          <section className="rounded-[28px] border border-line bg-white/84 p-5">
+          <section className="rounded-[24px] border border-line bg-white/84 p-4 sm:rounded-[28px] sm:p-5">
             <div className="border-b border-line pb-4">
               <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Suppression safety</p>
               <h2 className="mt-2 text-2xl font-semibold text-slate-950">

@@ -36,17 +36,17 @@ export function QuickAddModal({
       {isOpen && typeof document !== "undefined"
         ? createPortal(
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4">
-              <div className="w-full max-w-3xl overflow-hidden rounded-[32px] bg-[#f8f4ea] shadow-2xl">
+              <div className="w-full max-w-3xl overflow-hidden rounded-[32px] border border-line bg-surface-strong text-foreground shadow-2xl">
                 <div className="flex items-start justify-between gap-4 border-b border-line px-6 py-5">
                   <div>
-                    <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Quick add</p>
-                    <h2 className="mt-2 text-2xl font-semibold text-slate-950">{title}</h2>
-                    {description ? <p className="mt-2 text-sm text-slate-600">{description}</p> : null}
+                    <p className="text-sm uppercase tracking-[0.18em] text-muted">Quick add</p>
+                    <h2 className="mt-2 text-2xl font-semibold text-foreground">{title}</h2>
+                    {description ? <p className="mt-2 text-sm text-muted">{description}</p> : null}
                   </div>
                   <button
                     type="button"
                     onClick={() => setIsOpen(false)}
-                    className="inline-flex size-10 items-center justify-center rounded-full border border-line bg-white text-lg text-slate-700 transition hover:bg-slate-50"
+                    className="inline-flex size-10 items-center justify-center rounded-full border border-line bg-surface text-lg text-foreground transition hover:opacity-90"
                     aria-label={`Close ${title}`}
                   >
                     ×

@@ -49,7 +49,7 @@ export default async function CampaignOverviewPage({ params }: CampaignOverviewP
         },
       ]}
     >
-      <section className="glass-panel rounded-[34px] p-6">
+      <section className="glass-panel rounded-[28px] p-4 sm:rounded-[34px] sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-3">
@@ -99,15 +99,15 @@ export default async function CampaignOverviewPage({ params }: CampaignOverviewP
           <CampaignTabs campaignId={campaign.id} active="overview" />
         </div>
 
-        <div className="mt-6 grid gap-4 xl:grid-cols-4">
-          <div className="rounded-[24px] border border-line bg-white/84 p-4">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4 xl:gap-4">
+          <div className="rounded-[20px] border border-line bg-white/84 p-3.5 sm:rounded-[24px] sm:p-4">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Mailbox</p>
             <p className="mt-2 text-xl font-semibold text-slate-950">{mailbox?.email ?? "Unassigned"}</p>
             <p className="mt-2 text-sm text-slate-600">
               {mailbox ? "Connected and ready for scheduling." : "Assign a Gmail mailbox in Options."}
             </p>
           </div>
-          <div className="rounded-[24px] border border-line bg-white/84 p-4">
+          <div className="rounded-[20px] border border-line bg-white/84 p-3.5 sm:rounded-[24px] sm:p-4">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Latest audit</p>
             <p className="mt-2 text-xl font-semibold text-slate-950">
               {latestAuditJob ? `${latestAuditJob.findingsCreated} finding(s)` : "Not run yet"}
@@ -116,7 +116,7 @@ export default async function CampaignOverviewPage({ params }: CampaignOverviewP
               {latestAuditJob ? formatDateTime(latestAuditJob.updatedAt) : "Run the service lens first."}
             </p>
           </div>
-          <div className="rounded-[24px] border border-line bg-white/84 p-4">
+          <div className="rounded-[20px] border border-line bg-white/84 p-3.5 sm:rounded-[24px] sm:p-4">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Latest generation</p>
             <p className="mt-2 text-xl font-semibold text-slate-950">
               {latestGenerationRun?.summary ?? "No sequence run yet"}
@@ -125,7 +125,7 @@ export default async function CampaignOverviewPage({ params }: CampaignOverviewP
               {latestGenerationRun ? formatDateTime(latestGenerationRun.startedAt) : "Generate drafts after the audit."}
             </p>
           </div>
-          <div className="rounded-[24px] border border-line bg-white/84 p-4">
+          <div className="rounded-[20px] border border-line bg-white/84 p-3.5 sm:rounded-[24px] sm:p-4 sm:col-span-2 xl:col-span-1">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Latest thread</p>
             <p className="mt-2 text-xl font-semibold text-slate-950">
               {latestThread?.subject ?? "No inbox thread yet"}
@@ -136,8 +136,8 @@ export default async function CampaignOverviewPage({ params }: CampaignOverviewP
           </div>
         </div>
 
-        <div className="mt-6 grid gap-4 xl:grid-cols-2">
-          <div className="rounded-[28px] border border-line bg-white/84 p-5">
+        <div className="mt-5 grid gap-4 lg:grid-cols-2">
+          <div className="rounded-[24px] border border-line bg-white/84 p-4 sm:rounded-[28px] sm:p-5">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Sequence funnel</p>
             <div className="mt-4 space-y-3 text-sm text-slate-700">
               {[
@@ -156,7 +156,7 @@ export default async function CampaignOverviewPage({ params }: CampaignOverviewP
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-line bg-white/84 p-5">
+          <div className="rounded-[24px] border border-line bg-white/84 p-4 sm:rounded-[28px] sm:p-5">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Current lifecycle pressure</p>
             <div className="mt-4 flex flex-wrap gap-2">
               {[

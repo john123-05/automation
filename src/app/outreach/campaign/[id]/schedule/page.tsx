@@ -47,7 +47,7 @@ export default async function CampaignSchedulePage({ params }: CampaignScheduleP
         { label: "Stop on reply", value: data.campaign.stopOnReply ? "On" : "Off" },
       ]}
     >
-      <section className="glass-panel rounded-[34px] p-6">
+      <section className="glass-panel rounded-[28px] p-4 sm:rounded-[34px] sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-slate-600">
             Scheduling turns approved steps into timed sends and honors mailbox limits.
@@ -66,8 +66,8 @@ export default async function CampaignSchedulePage({ params }: CampaignScheduleP
           <CampaignTabs campaignId={data.campaign.id} active="schedule" />
         </div>
 
-        <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-          <section className="rounded-[28px] border border-line bg-white/84 p-5">
+        <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px] xl:gap-6">
+          <section className="rounded-[24px] border border-line bg-white/84 p-4 sm:rounded-[28px] sm:p-5">
             <div className="border-b border-line pb-4">
               <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Send rules</p>
               <h2 className="mt-2 text-2xl font-semibold text-slate-950">
@@ -89,7 +89,7 @@ export default async function CampaignSchedulePage({ params }: CampaignScheduleP
           </section>
 
           <div className="space-y-4">
-            <section className="rounded-[28px] border border-line bg-white/84 p-5">
+            <section className="rounded-[24px] border border-line bg-white/84 p-4 sm:rounded-[28px] sm:p-5">
               <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Mailbox capacity</p>
               <p className="mt-2 text-xl font-semibold text-slate-950">
                 {data.mailbox?.email ?? "No mailbox assigned"}
@@ -114,7 +114,7 @@ export default async function CampaignSchedulePage({ params }: CampaignScheduleP
               </div>
             </section>
 
-            <section className="rounded-[28px] border border-line bg-white/84 p-5">
+            <section className="rounded-[24px] border border-line bg-white/84 p-4 sm:rounded-[28px] sm:p-5">
               <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Cadence preview</p>
               <div className="mt-4 space-y-3">
                 {data.steps.map((step) => (
@@ -133,7 +133,7 @@ export default async function CampaignSchedulePage({ params }: CampaignScheduleP
               </p>
             </section>
 
-            <section className="rounded-[28px] border border-line bg-white/84 p-5">
+            <section className="rounded-[24px] border border-line bg-white/84 p-4 sm:rounded-[28px] sm:p-5">
               <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Recent activity</p>
               <p className="mt-2 text-sm text-slate-600">
                 Last thread: {data.latestThread ? formatDateTime(data.latestThread.updatedAt) : "Not yet"}

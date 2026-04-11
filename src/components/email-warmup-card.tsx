@@ -156,14 +156,14 @@ export function EmailWarmupCard({
             href="https://instantly.ai"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center justify-center rounded-full border border-line bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+            className="inline-flex items-center justify-center rounded-full border border-line bg-surface-strong px-3 py-1.5 text-xs font-medium text-foreground transition hover:opacity-90"
           >
             {labels.instantly}
           </Link>
           <button
             type="button"
             onClick={() => setIsOpen(true)}
-            className="inline-flex items-center justify-center rounded-full border border-line bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+            className="inline-flex items-center justify-center rounded-full border border-line bg-surface-strong px-3 py-1.5 text-xs font-medium text-foreground transition hover:opacity-90"
           >
             {labels.addAccount}
           </button>
@@ -226,11 +226,11 @@ export function EmailWarmupCard({
 
       {isOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-          <div className="w-full max-w-md rounded-[28px] bg-[#f8f4ea] p-6 shadow-2xl">
+          <div className="w-full max-w-md rounded-[28px] border border-line bg-surface-strong p-6 text-foreground shadow-2xl">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm uppercase tracking-[0.18em] text-muted">{labels.title}</p>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-950">{labels.modalTitle}</h2>
+                <h2 className="mt-2 text-2xl font-semibold text-foreground">{labels.modalTitle}</h2>
               </div>
               <button
                 type="button"
@@ -238,7 +238,7 @@ export function EmailWarmupCard({
                   setIsOpen(false);
                   setErrorMessage(null);
                 }}
-                className="inline-flex size-10 items-center justify-center rounded-full border border-line bg-white text-lg text-slate-600 transition hover:bg-slate-50"
+                className="inline-flex size-10 items-center justify-center rounded-full border border-line bg-surface text-lg text-foreground transition hover:opacity-90"
                 aria-label={labels.cancel}
               >
                 ×
@@ -253,7 +253,7 @@ export function EmailWarmupCard({
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-slate-900"
+                  className="w-full rounded-2xl border border-line bg-surface px-4 py-3 text-foreground outline-none transition focus:border-slate-900"
                   placeholder="name@domain.com"
                 />
               </label>
@@ -265,7 +265,7 @@ export function EmailWarmupCard({
                   type="date"
                   value={trialEndsOn}
                   onChange={(event) => setTrialEndsOn(event.target.value)}
-                  className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-slate-900"
+                  className="w-full rounded-2xl border border-line bg-surface px-4 py-3 text-foreground outline-none transition focus:border-slate-900"
                 />
               </label>
 
@@ -282,7 +282,7 @@ export function EmailWarmupCard({
                     setIsOpen(false);
                     setErrorMessage(null);
                   }}
-                  className="inline-flex items-center justify-center rounded-full border border-line bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                  className="inline-flex items-center justify-center rounded-full border border-line bg-surface px-4 py-2.5 text-sm font-medium text-foreground transition hover:opacity-90"
                 >
                   {labels.cancel}
                 </button>

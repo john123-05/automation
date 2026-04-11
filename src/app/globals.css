@@ -157,6 +157,8 @@ textarea {
 
 .theme-dark [class*="bg-\\[\\#f8f4ea\\]"],
 .theme-dark [class*="bg-\\[\\#f8f4ec\\]"],
+.theme-dark [class*="bg-\\[\\#ece7db\\]"],
+.theme-dark [class*="bg-\\[\\#f3eee4\\]"],
 .theme-dark [class*="bg-accent-soft"] {
   background: #151719 !important;
   background-image: none !important;
@@ -177,6 +179,10 @@ textarea {
 
 .theme-dark [class*="border-line"] {
   border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.theme-dark [class*="border-slate-300"] {
+  border-color: rgba(255, 255, 255, 0.14) !important;
 }
 
 .theme-dark [class*="bg-slate-950"],

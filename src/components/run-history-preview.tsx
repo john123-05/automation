@@ -32,7 +32,7 @@ export function RunHistoryPreview({
           <button
             type="button"
             onClick={() => setIsOpen(true)}
-            className="inline-flex items-center justify-center rounded-full border border-line bg-white/80 px-3 py-1.5 text-[11px] font-medium text-slate-900 transition hover:bg-white sm:px-4 sm:py-2 sm:text-sm"
+            className="inline-flex items-center justify-center rounded-full border border-line bg-surface-strong px-3 py-1.5 text-[11px] font-medium text-foreground transition hover:opacity-90 sm:px-4 sm:py-2 sm:text-sm"
           >
             {t(language, "expand")}
           </button>
@@ -41,16 +41,16 @@ export function RunHistoryPreview({
 
       {isOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4">
-          <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[32px] bg-[#f8f4ea] shadow-2xl">
+          <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[32px] border border-line bg-surface-strong text-foreground shadow-2xl">
             <div className="flex items-center justify-between gap-3 border-b border-line px-6 py-5">
               <div>
                 <p className="text-sm uppercase tracking-[0.18em] text-muted">{t(language, "runHistory")}</p>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-950">{t(language, "allRuns")}</h2>
+                <h2 className="mt-2 text-2xl font-semibold text-foreground">{t(language, "allRuns")}</h2>
               </div>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="inline-flex size-10 items-center justify-center rounded-full border border-line bg-white text-lg text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex size-10 items-center justify-center rounded-full border border-line bg-surface text-lg text-foreground transition hover:opacity-90"
                 aria-label={t(language, "closeRunHistory")}
               >
                 ×

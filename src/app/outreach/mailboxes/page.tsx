@@ -22,11 +22,11 @@ export default async function OutreachMailboxesPage() {
 
   return (
     <OutreachShell activeNav="mailboxes" title="Mailboxes" stats={getOutreachShellStats(snapshot)}>
-      <section className="glass-panel rounded-[34px] p-6">
+      <section className="glass-panel rounded-[28px] p-4 sm:rounded-[34px] sm:p-6">
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-4">
           <div>
-            <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Mailbox operator</p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 sm:text-sm">Mailbox operator</p>
+            <h2 className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">
               Connect Google or SMTP mailboxes and watch send capacity
             </h2>
           </div>
@@ -36,20 +36,20 @@ export default async function OutreachMailboxesPage() {
           <MailboxConnectOptions />
         </div>
 
-        <div className="mt-6 grid gap-4 xl:grid-cols-3">
-          <div className="rounded-[24px] border border-line bg-white/84 p-4">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+          <div className="rounded-[20px] border border-line bg-white/84 p-3.5 sm:rounded-[24px] sm:p-4">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Connected</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-950">{connectedMailboxes.length}</p>
+            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{connectedMailboxes.length}</p>
           </div>
-          <div className="rounded-[24px] border border-line bg-white/84 p-4">
+          <div className="rounded-[20px] border border-line bg-white/84 p-3.5 sm:rounded-[24px] sm:p-4">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Campaign assignments</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-950">
+            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">
               {snapshot.campaigns.filter((campaign) => campaign.mailboxId).length}
             </p>
           </div>
-          <div className="rounded-[24px] border border-line bg-white/84 p-4">
+          <div className="rounded-[20px] border border-line bg-white/84 p-3.5 sm:rounded-[24px] sm:p-4 sm:col-span-2 lg:col-span-1">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Threads tracked</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-950">{snapshot.emailThreads.length}</p>
+            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{snapshot.emailThreads.length}</p>
           </div>
         </div>
 
@@ -100,22 +100,22 @@ export default async function OutreachMailboxesPage() {
                     </Link>
                   </div>
 
-                  <div className="mt-5 grid gap-4 md:grid-cols-3">
-                    <div className="rounded-[22px] border border-line bg-slate-50/80 p-4">
+                  <div className="mt-5 grid gap-3 md:grid-cols-3 md:gap-4">
+                    <div className="rounded-[20px] border border-line bg-slate-50/80 p-3.5 sm:rounded-[22px] sm:p-4">
                       <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Daily limit</p>
-                      <p className="mt-2 text-2xl font-semibold text-slate-950">
+                      <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">
                         {mailbox.dailyLimit ?? "Unlimited"}
                       </p>
                     </div>
-                    <div className="rounded-[22px] border border-line bg-slate-50/80 p-4">
+                    <div className="rounded-[20px] border border-line bg-slate-50/80 p-3.5 sm:rounded-[22px] sm:p-4">
                       <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Sent today</p>
-                      <p className="mt-2 text-2xl font-semibold text-slate-950">{usage.sentToday}</p>
+                      <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{usage.sentToday}</p>
                     </div>
-                    <div className="rounded-[22px] border border-line bg-slate-50/80 p-4">
+                    <div className="rounded-[20px] border border-line bg-slate-50/80 p-3.5 sm:rounded-[22px] sm:p-4">
                       <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
                         Remaining today
                       </p>
-                      <p className="mt-2 text-2xl font-semibold text-slate-950">
+                      <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">
                         {usage.remainingToday ?? "Unlimited"}
                       </p>
                     </div>

@@ -33,8 +33,8 @@ export function OutreachShell({
 }) {
   return (
     <main className="mx-auto w-full max-w-[1680px] overflow-x-hidden px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-      <div className="grid gap-5 xl:grid-cols-[auto_minmax(0,1fr)]">
-        <aside className="hidden xl:sticky xl:top-6 xl:block xl:self-start">
+      <div className="grid gap-5 lg:grid-cols-[auto_minmax(0,1fr)]">
+        <aside className="hidden lg:sticky lg:top-6 lg:block lg:self-start">
           <OutreachSidebar
             items={navItems.map((item) => ({
               ...item,

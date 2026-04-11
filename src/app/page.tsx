@@ -588,7 +588,7 @@ export default async function Home() {
       ) : null}
 
       <section className="space-y-4">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {snapshot.billingOverview.cards.map((card) => (
             <BillingCardPanel key={card.id} {...card} />
           ))}
@@ -597,15 +597,15 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-5">
-        <div className="col-span-2 grid grid-cols-2 gap-3 sm:contents xl:col-span-4 xl:grid xl:grid-cols-4 xl:gap-4">
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
+        <div className="col-span-2 grid grid-cols-2 gap-3 md:col-span-2 xl:col-span-4 xl:grid xl:grid-cols-4 xl:gap-4">
           <StatCard label="Leads" value={snapshot.stats.leadCount.toString()} detail="" />
           <StatCard label="Enriched" value={snapshot.stats.enrichedLeadCount.toString()} detail="" />
           <StatCard label={t(language, "contacts")} value={snapshot.stats.contactCount.toString()} detail="" />
           <StatCard label="Need Attention" value={snapshot.stats.failedLeadCount.toString()} detail="" />
         </div>
 
-        <div className="col-span-2 xl:col-span-1">
+        <div className="col-span-2 md:col-span-1 xl:col-span-1">
           <RunHistoryPreview runs={snapshot.runs} language={language}>
             <div className="space-y-4">
               {snapshot.runs.length ? (
@@ -620,7 +620,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-2 xl:gap-6">
+      <section className="grid gap-4 lg:grid-cols-2 lg:gap-6">
         <div className="glass-panel rounded-[24px] p-4 sm:rounded-[32px] sm:p-6">
           <div className="mb-4 sm:mb-5">
             <p className="text-[10px] uppercase tracking-[0.16em] text-muted sm:text-sm sm:tracking-[0.18em]">
@@ -696,7 +696,7 @@ export default async function Home() {
           leads={snapshot.leads}
           returnPath="/"
           language={language}
-          triggerClassName="inline-flex min-w-0 flex-1 items-center justify-center whitespace-nowrap rounded-full border border-slate-300 bg-[#ece7db] px-2.5 py-2 text-[10px] font-medium tracking-[0.02em] text-slate-900 transition hover:bg-[#f3eee4]"
+          triggerClassName="inline-flex min-w-0 flex-1 items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface-strong px-2.5 py-2 text-[10px] font-medium tracking-[0.02em] text-foreground transition hover:opacity-90"
         />
       </MobileQuickActionsBar>
     </main>

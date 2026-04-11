@@ -50,11 +50,11 @@ export default async function OutreachSetupPage() {
 
   return (
     <OutreachShell activeNav="setup" title="Setup" stats={getOutreachShellStats(snapshot)}>
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-        <section className="glass-panel rounded-[34px] p-6">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] xl:gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+        <section className="glass-panel rounded-[28px] p-4 sm:rounded-[34px] sm:p-6">
           <div className="border-b border-line pb-4">
-            <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Campaign builder</p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 sm:text-sm">Campaign builder</p>
+            <h2 className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">
               Create the campaign first, then run the workflow
             </h2>
           </div>
@@ -68,10 +68,10 @@ export default async function OutreachSetupPage() {
           </div>
         </section>
 
-        <section className="glass-panel rounded-[34px] p-6">
+        <section className="glass-panel rounded-[28px] p-4 sm:rounded-[34px] sm:p-6">
           <div className="border-b border-line pb-4">
-            <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Operator notes</p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 sm:text-sm">Operator notes</p>
+            <h2 className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">
               Keep the engine manual-first until the copy feels right
             </h2>
           </div>
@@ -96,11 +96,11 @@ export default async function OutreachSetupPage() {
         </section>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <section className="glass-panel rounded-[34px] p-6">
+      <div className="grid gap-5 lg:grid-cols-2 xl:gap-6">
+        <section className="glass-panel rounded-[28px] p-4 sm:rounded-[34px] sm:p-6">
           <div className="border-b border-line pb-4">
-            <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Audit & variables</p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 sm:text-sm">Audit & variables</p>
+            <h2 className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">
               Run the website lens and store proof points
             </h2>
           </div>
@@ -110,10 +110,10 @@ export default async function OutreachSetupPage() {
           </div>
         </section>
 
-        <section className="glass-panel rounded-[34px] p-6">
+        <section className="glass-panel rounded-[28px] p-4 sm:rounded-[34px] sm:p-6">
           <div className="border-b border-line pb-4">
-            <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Sequence generation</p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 sm:text-sm">Sequence generation</p>
+            <h2 className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">
               Turn saved findings into the 4-step written cadence
             </h2>
           </div>
@@ -128,15 +128,38 @@ export default async function OutreachSetupPage() {
         </section>
       </div>
 
-      <section className="glass-panel rounded-[34px] p-6">
+      <section className="glass-panel rounded-[28px] p-4 sm:rounded-[34px] sm:p-6">
         <div className="border-b border-line pb-4">
-          <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Recent ops</p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 sm:text-sm">Recent ops</p>
+          <h2 className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">
             Latest audit, generation, inbox, and send runs
           </h2>
         </div>
 
-        <div className="mt-6 overflow-x-auto rounded-[28px] border border-line bg-white/84">
+        <div className="mt-5 space-y-3 xl:hidden">
+          {recentRuns.length ? (
+            recentRuns.map((run) => (
+              <article key={run.id} className="rounded-[22px] border border-line bg-white/84 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-950">{run.kind}</p>
+                    <p className="mt-1 text-xs text-slate-500">{formatDateTime(run.startedAt)}</p>
+                  </div>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-medium text-slate-700">
+                    {run.status}
+                  </span>
+                </div>
+                <p className="mt-3 text-sm text-slate-700">{run.summary ?? "No summary captured yet."}</p>
+              </article>
+            ))
+          ) : (
+            <div className="rounded-[22px] border border-dashed border-line px-4 py-10 text-center text-sm text-slate-600">
+              No outreach operations have been run yet.
+            </div>
+          )}
+        </div>
+
+        <div className="mt-6 hidden overflow-x-auto rounded-[28px] border border-line bg-white/84 xl:block">
           <div className="min-w-[860px]">
             <div className="grid grid-cols-[140px_180px_minmax(260px,1fr)_140px] gap-4 border-b border-line px-5 py-4 text-[11px] uppercase tracking-[0.2em] text-slate-500">
               <span>Kind</span>
