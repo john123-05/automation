@@ -17,9 +17,12 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fieldflow",
+  title: {
+    default: "Lean Mean Lead Finder Machine",
+    template: "%s | Lean Mean Lead Finder Machine",
+  },
   description:
-    "A sales outreach machine that replaces n8n lead scraping and enrichment flows with a real dashboard.",
+    "Lean Mean Lead Finder Machine centralizes lead search, contact enrichment, inbox activity, documents, and outreach operations in one dashboard.",
 };
 
 const rootClassName = `${spaceGrotesk.variable} ${plexMono.variable} h-full antialiased`;

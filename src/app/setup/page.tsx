@@ -5,7 +5,7 @@ import { getEnv } from "@/lib/env";
 import { getSetupVaultSectionsState } from "@/lib/setup-vault";
 
 export const metadata = {
-  title: "Setup | Fieldflow",
+  title: "Setup",
   description:
     "Local setup vault for rotating API keys, billing credentials, Supabase storage, and Gmail OAuth without hand-editing environment files.",
 };

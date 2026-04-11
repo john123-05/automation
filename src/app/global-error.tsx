@@ -10,7 +10,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   unstable_retry: () => void;
 }) {
-  const message = error?.message?.trim() || "Something went wrong while loading Fieldflow.";
+  const message =
+    error?.message?.trim() || "Something went wrong while loading Lean Mean Lead Finder Machine.";
 
   return (
     <html lang="en" className="h-full theme-light">
@@ -18,8 +19,10 @@ export default function GlobalError({
         <main className="mx-auto flex min-h-screen w-full max-w-2xl items-center px-4 py-10 sm:px-6">
           <section className="glass-panel w-full rounded-[34px] p-8">
             <p className="text-sm uppercase tracking-[0.18em] text-muted">Global Error</p>
-            <title>Fieldflow Error</title>
-            <h1 className="mt-3 text-3xl font-semibold text-slate-950">Fieldflow hit a runtime error</h1>
+            <title>Lean Mean Lead Finder Machine Error</title>
+            <h1 className="mt-3 text-3xl font-semibold text-slate-950">
+              Lean Mean Lead Finder Machine hit a runtime error
+            </h1>
             <p className="mt-3 text-sm text-slate-600">
               The app failed while rendering this page. Retry once first. If it keeps happening,
               reopen the app or redeploy the current version.

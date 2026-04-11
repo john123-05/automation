@@ -32,7 +32,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     language === "de"
       ? {
           overline: "Sicherer Zugang",
-          title: "Bei Fieldflow anmelden",
+          title: "Bei Lean Mean Lead Finder Machine anmelden",
           description:
             "Diese gehostete App ist mit einem gemeinsamen Passwort geschützt, bevor du das Dashboard öffnen kannst.",
           password: "Passwort",
@@ -41,7 +41,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         }
       : {
           overline: "Secure access",
-          title: "Sign in to Fieldflow",
+          title: "Sign in to Lean Mean Lead Finder Machine",
           description:
             "This hosted app is protected by a shared password before you can open the dashboard.",
           password: "Password",
