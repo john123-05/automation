@@ -212,3 +212,73 @@ textarea {
 .theme-dark textarea::placeholder {
   color: #8e979d;
 }
+
+/* Colored status badge backgrounds → dark tinted equivalents */
+.theme-dark [class*="bg-emerald-50"],
+.theme-dark [class*="bg-emerald-100"] {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+}
+.theme-dark [class*="bg-rose-50"],
+.theme-dark [class*="bg-rose-100"] {
+  background-color: rgba(244, 63, 94, 0.15) !important;
+}
+.theme-dark [class*="bg-amber-50"],
+.theme-dark [class*="bg-amber-100"] {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+}
+.theme-dark [class*="bg-cyan-50"],
+.theme-dark [class*="bg-cyan-100"] {
+  background-color: rgba(6, 182, 212, 0.15) !important;
+}
+.theme-dark [class*="bg-sky-50"],
+.theme-dark [class*="bg-sky-100"] {
+  background-color: rgba(14, 165, 233, 0.15) !important;
+}
+.theme-dark [class*="bg-violet-50"],
+.theme-dark [class*="bg-violet-100"] {
+  background-color: rgba(139, 92, 246, 0.15) !important;
+}
+
+/* Colored text inside those badges → lighter tints for dark bg */
+.theme-dark [class*="text-emerald-800"],
+.theme-dark [class*="text-emerald-700"] {
+  color: #6ee7b7 !important;
+}
+.theme-dark [class*="text-rose-800"],
+.theme-dark [class*="text-rose-700"],
+.theme-dark [class*="text-rose-900"] {
+  color: #fda4af !important;
+}
+.theme-dark [class*="text-amber-800"],
+.theme-dark [class*="text-amber-700"],
+.theme-dark [class*="text-amber-900"],
+.theme-dark [class*="text-amber-950"] {
+  color: #fcd34d !important;
+}
+.theme-dark [class*="text-cyan-900"],
+.theme-dark [class*="text-cyan-700"] {
+  color: #67e8f9 !important;
+}
+.theme-dark [class*="text-sky-700"] {
+  color: #7dd3fc !important;
+}
+.theme-dark [class*="text-violet-700"] {
+  color: #c4b5fd !important;
+}
+
+/* Colored text: remaining shades */
+.theme-dark [class*="text-emerald-900"] {
+  color: #6ee7b7 !important;
+}
+
+/* Colored borders */
+.theme-dark [class*="border-rose-200"],
+.theme-dark [class*="border-rose-300"] {
+  border-color: rgba(244, 63, 94, 0.3) !important;
+}
+.theme-dark [class*="border-amber-200"] {
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+.theme-dark [class*="border-emerald-200"] {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
