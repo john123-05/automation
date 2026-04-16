@@ -12,6 +12,7 @@
     "inbox:idle": "tsx src/workers/inbox-idle.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.90.0",
     "@google-cloud/bigquery": "^8.1.1",
     "@supabase/supabase-js": "^2.100.1",
     "@types/nodemailer": "^8.0.0",

@@ -4,6 +4,7 @@ import {
   type EnrichmentResult,
 } from "@/lib/sales-machine/contact-enrichment-schema";
 import { sumOpenAiRunSpend } from "@/lib/billing/openai-app";
+import { enrichLeadWithClaude } from "@/lib/sales-machine/claude-enrichment";
 import { enrichLeadWithGemini } from "@/lib/sales-machine/gemini-enrichment";
 import { enrichLeadWithOpenAi } from "@/lib/sales-machine/openai-enrichment";
 import { serializeError } from "@/lib/sales-machine/utils";
@@ -13,6 +14,8 @@ type ResearchEnv = {
   openAiModel: string;
   geminiApiKey: string | null;
   geminiModel: string;
+  anthropicApiKey: string | null;
+  claudeModel: string;
 };
 
 type ResearchProvider = {
@@ -33,11 +36,17 @@ export type ResearchAttempt = {
 };
 
 export function describeResearchProvider(provider: AiResearchProvider) {
-  return provider === "gemini:google_search" ? "Gemini Google Search" : "OpenAI Web Search";
+  if (provider === "gemini:google_search") return "Gemini Google Search";
+  if (provider === "claude:web_search") return "Claude Web Search";
+  return "OpenAI Web Search";
 }
 
 export function getAvailableResearchProviders(env: ResearchEnv) {
-  return getOrderedResearchProviders(env, ["gemini:google_search", "openai:web_search"]);
+  return getOrderedResearchProviders(env, [
+    "gemini:google_search",
+    "openai:web_search",
+    "claude:web_search",
+  ]);
 }
 
 export function getOrderedResearchProviders(
@@ -67,6 +76,19 @@ export function getOrderedResearchProviders(
         enrichLeadWithGemini({
           apiKey: env.geminiApiKey!,
           model: env.geminiModel,
+          lead,
+        }),
+    });
+  }
+
+  if (env.anthropicApiKey) {
+    providers.set("claude:web_search", {
+      id: "claude:web_search",
+      label: describeResearchProvider("claude:web_search"),
+      run: (lead) =>
+        enrichLeadWithClaude({
+          apiKey: env.anthropicApiKey!,
+          model: env.claudeModel,
           lead,
         }),
     });

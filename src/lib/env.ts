@@ -18,6 +18,8 @@ export function getEnv() {
     openAiModel: pick("OPENAI_MODEL", process.env.OPENAI_MODEL) || "gpt-5-mini",
     geminiApiKey: pick("GEMINI_API_KEY", process.env.GEMINI_API_KEY),
     geminiModel: pick("GEMINI_MODEL", process.env.GEMINI_MODEL) || "gemini-2.5-flash",
+    anthropicApiKey: pick("ANTHROPIC_API_KEY", process.env.ANTHROPIC_API_KEY),
+    claudeModel: pick("CLAUDE_MODEL", process.env.CLAUDE_MODEL) ?? "claude-haiku-4-5-20251001",
     supabaseUrl: pick("SUPABASE_URL", process.env.SUPABASE_URL),
     supabaseServiceRoleKey: pick(
       "SUPABASE_SERVICE_ROLE_KEY",
@@ -115,6 +117,13 @@ export function getProviderStatuses(): ProviderStatus[] {
       hint: env.geminiApiKey
         ? `Fallback enrichment is ready with ${env.geminiModel}.`
         : "Add GEMINI_API_KEY to enable Gemini fallback research.",
+    },
+    {
+      label: "Claude Web Search",
+      connected: Boolean(env.anthropicApiKey),
+      hint: env.anthropicApiKey
+        ? `Last-resort fallback enrichment is ready with ${env.claudeModel}.`
+        : "Add ANTHROPIC_API_KEY to enable Claude as a final fallback for enrichment.",
     },
     {
       label: "Storage",

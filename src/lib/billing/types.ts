@@ -5,7 +5,7 @@ export type BillingMetric = {
   value: string;
 };
 
-export type BillingCardId = "google-cloud" | "trial-credits" | "openai";
+export type BillingCardId = "google-cloud" | "trial-credits" | "openai" | "anthropic";
 
 export type BillingCard = {
   id: BillingCardId;

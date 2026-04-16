@@ -1,4 +1,5 @@
 import "server-only";
+import { getAppTrackedClaudeSpend } from "@/lib/billing/anthropic-app";
 import { getAppTrackedOpenAiSpend } from "@/lib/billing/openai-app";
 import type { BillingCard, BillingOverview } from "@/lib/billing/types";
 import { getGoogleCloudBillingSnapshot } from "@/lib/billing/google-cloud";
@@ -225,6 +226,43 @@ function buildOpenAiCard({
   };
 }
 
+function buildAnthropicCard({
+  appSpend,
+  anthropicApiKey,
+}: {
+  appSpend: ReturnType<typeof getAppTrackedClaudeSpend>;
+  anthropicApiKey: string | null;
+}): BillingCard {
+  const hasKey = Boolean(anthropicApiKey);
+  const hasData = Boolean(appSpend.lastUpdatedAt);
+
+  return {
+    id: "anthropic",
+    title: "Anthropic",
+    titleSuffix: null,
+    scopeLabel: "App-tracked from Claude enrichment runs.",
+    status: hasKey ? "ready" : "setup-needed",
+    statusLabel: hasKey ? (hasData ? "Live" : "Ready") : "Setup needed",
+    summary: hasKey
+      ? hasData
+        ? "Costs are tracked from contact enrichment runs that used Claude as a fallback provider."
+        : "No Claude enrichment runs yet. Claude will be used automatically when higher-priority providers fail."
+      : "Add ANTHROPIC_API_KEY to enable Claude as a last-resort fallback for contact enrichment.",
+    metrics: [
+      {
+        label: "App MTD",
+        value: hasKey ? formatMoney(appSpend.monthToDateCost, appSpend.currency) : "Add API key",
+      },
+      {
+        label: "App 7 days",
+        value: hasKey ? formatMoney(appSpend.last7DaysCost, appSpend.currency) : "Add API key",
+      },
+    ],
+    lastUpdatedAt: appSpend.lastUpdatedAt,
+    refreshPath: null,
+  };
+}
+
 export async function getBillingOverview({
   runs = [],
 }: {
@@ -235,6 +273,8 @@ export async function getBillingOverview({
     getOpenAiBillingSnapshot(),
   ]);
   const openAiAppSpend = getAppTrackedOpenAiSpend(runs);
+  const claudeAppSpend = getAppTrackedClaudeSpend(runs);
+  const env = getEnv();
 
   return {
     cards: [
@@ -242,6 +282,10 @@ export async function getBillingOverview({
       buildOpenAiCard({
         orgBilling: openAiBilling,
         appSpend: openAiAppSpend,
+      }),
+      buildAnthropicCard({
+        appSpend: claudeAppSpend,
+        anthropicApiKey: env.anthropicApiKey,
       }),
     ],
   };

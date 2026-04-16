@@ -16,7 +16,7 @@ export type StepStatus = "running" | "completed" | "failed";
 
 export type JobStatus = "running" | "completed" | "failed";
 
-export type AiResearchProvider = "openai:web_search" | "gemini:google_search";
+export type AiResearchProvider = "openai:web_search" | "gemini:google_search" | "claude:web_search";
 
 export type ServiceKey =
   | "seo"
@@ -203,6 +203,7 @@ export type WorkflowRun = {
   status: RunStatus;
   input: Record<string, unknown> & {
     openAiSpend?: OpenAiRunSpend | null;
+    claudeSpend?: OpenAiRunSpend | null;
   };
   summary: string | null;
   error: string | null;

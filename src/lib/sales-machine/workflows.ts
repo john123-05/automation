@@ -522,10 +522,15 @@ export async function runContactEnrichment(
         ? ["openai:web_search"]
         : [];
 
+    if (env.anthropicApiKey) {
+      providerOrder.push("claude:web_search");
+    }
+
     const researchProviders = getAvailableResearchProviders({
       ...env,
       openAiApiKey: providerOrder.includes("openai:web_search") ? env.openAiApiKey : null,
       geminiApiKey: providerOrder.includes("gemini:google_search") ? env.geminiApiKey : null,
+      anthropicApiKey: providerOrder.includes("claude:web_search") ? env.anthropicApiKey : null,
     });
 
     if (researchProviders.length === 0) {
@@ -611,6 +616,7 @@ export async function runContactEnrichment(
     let missing = 0;
     let failed = 0;
     const runSpendItems: NonNullable<WorkflowRun["input"]["openAiSpend"]>[] = [];
+    const runClaudeSpendItems: NonNullable<WorkflowRun["input"]["claudeSpend"]>[] = [];
 
     for (const lead of queuedLeads) {
       const leadStep = await addStep(
@@ -625,11 +631,19 @@ export async function runContactEnrichment(
           env,
           providerOrder,
         });
-        const leadSpend = sumOpenAiRunSpend(
+        const nonClaudeSpend = sumOpenAiRunSpend(
           enrichment.attempts
-            .map((attempt) => attempt.billing)
+            .filter((a) => a.provider !== "claude:web_search")
+            .map((a) => a.billing)
             .filter(Boolean) as NonNullable<(typeof enrichment.attempts)[number]["billing"]>[],
         );
+        const claudeLeadSpend = sumOpenAiRunSpend(
+          enrichment.attempts
+            .filter((a) => a.provider === "claude:web_search")
+            .map((a) => a.billing)
+            .filter(Boolean) as NonNullable<(typeof enrichment.attempts)[number]["billing"]>[],
+        );
+        const leadSpend = nonClaudeSpend;
 
         await mutateDb((db) => {
           const currentLead = db.leads.find((candidate) => candidate.id === lead.id);
@@ -667,10 +681,17 @@ export async function runContactEnrichment(
 
         if (leadSpend) {
           runSpendItems.push(leadSpend);
+        }
 
+        if (claudeLeadSpend) {
+          runClaudeSpendItems.push(claudeLeadSpend);
+        }
+
+        if (leadSpend || claudeLeadSpend) {
           await updateRunInput(run.id, (currentInput) => ({
             ...currentInput,
             openAiSpend: sumOpenAiRunSpend(runSpendItems),
+            claudeSpend: sumOpenAiRunSpend(runClaudeSpendItems),
           }));
         }
 

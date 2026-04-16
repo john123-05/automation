@@ -8,6 +8,8 @@ export type SetupVaultKey =
   | "OPENAI_MODEL"
   | "GEMINI_API_KEY"
   | "GEMINI_MODEL"
+  | "ANTHROPIC_API_KEY"
+  | "CLAUDE_MODEL"
   | "SUPABASE_URL"
   | "SUPABASE_SERVICE_ROLE_KEY"
   | "GCP_BIGQUERY_SERVICE_ACCOUNT_JSON"
@@ -31,6 +33,7 @@ export type SetupVaultSectionId =
   | "places"
   | "openai"
   | "gemini"
+  | "anthropic"
   | "supabase"
   | "billing"
   | "gmail"
@@ -123,6 +126,26 @@ export const setupVaultSections: SetupVaultSection[] = [
         label: "Gemini model",
         secret: false,
         placeholder: "gemini-2.5-flash",
+      },
+    ],
+  },
+  {
+    id: "anthropic",
+    title: "Anthropic (Claude)",
+    description:
+      "Last-resort fallback for contact enrichment. Claude Haiku is used by default.",
+    fields: [
+      {
+        key: "ANTHROPIC_API_KEY",
+        label: "Anthropic API key",
+        secret: true,
+        placeholder: "sk-ant-...",
+      },
+      {
+        key: "CLAUDE_MODEL",
+        label: "Claude model",
+        secret: false,
+        placeholder: "claude-haiku-4-5-20251001",
       },
     ],
   },
