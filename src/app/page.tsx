@@ -318,11 +318,10 @@ export default async function Home() {
     .map((run) => {
       const leadCount = snapshot.leads.filter((lead) => lead.searchRunId === run.id).length;
 
-      return {
-        id: run.id,
-        label: formatSearchRunLabel(run, leadCount),
-      };
-    });
+      return { id: run.id, label: formatSearchRunLabel(run, leadCount), leadCount };
+    })
+    .filter((option) => option.leadCount > 0)
+    .map(({ id, label }) => ({ id, label }));
   const notices: DashboardNotice[] = [];
   const trialCreditsCard = snapshot.billingOverview.cards.find((card) => card.id === "trial-credits");
   const openAiCard = snapshot.billingOverview.cards.find((card) => card.id === "openai");
@@ -499,14 +498,15 @@ export default async function Home() {
                   </MobileDrawer>
                 </div>
               </div>
+            </div>
 
-              <div
-                data-mobile-hero-actions
-                className="mt-6 hidden flex-wrap items-center gap-3 sm:flex"
-              >
+            <div
+              data-mobile-hero-actions
+              className="mt-6 hidden items-center gap-3 sm:flex overflow-x-auto"
+            >
                 <Link
                   href="/workspace"
-                  className={`inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition ${
+                  className={`inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full px-5 py-3 text-sm font-medium transition ${
                     theme === "dark"
                       ? "bg-slate-100 text-[#111315] hover:bg-white"
                       : "bg-slate-950 text-white hover:bg-slate-800"
@@ -516,33 +516,35 @@ export default async function Home() {
                 </Link>
                 <Link
                   href="/outreach"
-                  className="inline-flex items-center justify-center rounded-full border border-line bg-white/80 px-5 py-3 text-sm font-medium text-slate-900 transition hover:bg-white"
+                  className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-line bg-white/80 px-5 py-3 text-sm font-medium text-slate-900 transition hover:bg-white"
                 >
                   {t(language, "outreachEngine")}
                 </Link>
                 <QuickAddCompanyModal
                   returnPath="/"
                   language={language}
-                  triggerClassName="inline-flex items-center justify-center rounded-full bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+                  triggerClassName="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
                 />
                 <QuickAddContactModal
                   leads={snapshot.leads}
                   returnPath="/"
                   language={language}
-                  triggerClassName="inline-flex items-center justify-center rounded-full bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+                  triggerClassName="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
                 />
                 <Link
                   href="/documents"
-                  className="inline-flex items-center justify-center rounded-full border border-line bg-white/80 px-5 py-3 text-sm font-medium text-slate-900 transition hover:bg-white"
+                  className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-line bg-white/80 px-5 py-3 text-sm font-medium text-slate-900 transition hover:bg-white"
                 >
                   {t(language, "documentation")}
                 </Link>
-                <UniversalSearchLauncher
-                  leads={snapshot.leads}
-                  contacts={snapshot.contacts}
-                  language={language}
-                />
-                <SettingsButton language={language} />
+                <div className="flex shrink-0 items-center gap-3">
+                  <UniversalSearchLauncher
+                    leads={snapshot.leads}
+                    contacts={snapshot.contacts}
+                    language={language}
+                  />
+                  <SettingsButton language={language} />
+                </div>
               </div>
 
               <div className="mt-3 hidden flex-wrap items-center gap-2 sm:mt-4 sm:flex">
@@ -562,7 +564,6 @@ export default async function Home() {
                     <p className="text-[11px] font-medium text-slate-900">{provider.label}</p>
                   </div>
                 ))}
-              </div>
             </div>
           </div>
         </section>
