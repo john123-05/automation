@@ -22,6 +22,7 @@ export const workspaceTabs = [
   { id: "projects", label: "Projects" },
   { id: "reports", label: "Reports" },
   { id: "data", label: "Data" },
+  { id: "trash", label: "Trash" },
 ] as const;
 
 type WorkspaceFilterOptions = {

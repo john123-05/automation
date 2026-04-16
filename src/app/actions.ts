@@ -18,9 +18,22 @@ import {
   updateProposalStatus,
   upsertOpportunity,
 } from "@/lib/sales-machine/agency-os";
+import {
+  moveCampaignToTrash,
+  moveClientToTrash,
+  moveContactToTrash,
+  moveLeadToTrash,
+  moveOpportunityToTrash,
+  moveProjectToTrash,
+  moveProposalToTrash,
+  moveReportToTrash,
+  moveRunToTrash,
+  moveSheetToTrash,
+  pruneExpiredTrashEntries,
+  restoreTrashEntry,
+} from "@/lib/sales-machine/recycle-bin";
 import { mutateDb } from "@/lib/sales-machine/store";
 import {
-  createSheetKey,
   getSheetKeyFromRun,
 } from "@/lib/sales-machine/workspace-sheets";
 import { runContactEnrichment, runLeadSearch } from "@/lib/sales-machine/workflows";
@@ -262,6 +275,12 @@ function touchLeadContactState(db: Parameters<typeof mutateDb>[0] extends (db: i
   if (count > 0 && lead.stage !== "error") {
     lead.stage = "enriched";
   }
+}
+
+function revalidatePrimaryViews() {
+  revalidatePath("/");
+  revalidatePath("/workspace");
+  revalidatePath("/outreach");
 }
 
 function upsertContact(
@@ -529,19 +548,11 @@ export async function enrichLeadsAction(
 
 export async function deleteRunAction(runId: string) {
   await mutateDb((db) => {
-    db.runs = db.runs.filter((run) => run.id !== runId);
-    db.searchJobs = db.searchJobs.filter((job) => job.runId !== runId);
-    db.enrichmentJobs = db.enrichmentJobs.filter((job) => job.runId !== runId);
-    const deletedAuditJobIds = new Set(
-      db.auditJobs.filter((job) => job.runId === runId).map((job) => job.id),
-    );
-    db.auditJobs = db.auditJobs.filter((job) => job.runId !== runId);
-    db.auditFindings = db.auditFindings.filter((finding) => !deletedAuditJobIds.has(finding.jobId));
+    pruneExpiredTrashEntries(db);
+    moveRunToTrash(db, runId);
   });
 
-  revalidatePath("/");
-  revalidatePath("/workspace");
-  revalidatePath("/outreach");
+  revalidatePrimaryViews();
 }
 
 export async function renameSheetAction(formData: FormData) {
@@ -573,88 +584,102 @@ export async function renameSheetAction(formData: FormData) {
 
 export async function deleteSheetAction(sheetKey: string) {
   await mutateDb((db) => {
-    const deletedLeadIds = new Set(
-      db.leads
-        .filter((lead) => {
-          return createSheetKey(lead.niche, lead.locationLabel) === sheetKey;
-        })
-        .map((lead) => lead.id),
-    );
-
-    const deletedSearchRunIds = new Set(
-      db.runs
-        .filter((run) => run.kind === "lead-search" && getSheetKeyFromRun(run) === sheetKey)
-        .map((run) => run.id),
-    );
-
-    db.leads = db.leads.filter((lead) => !deletedLeadIds.has(lead.id));
-    db.contacts = db.contacts.filter((contact) => !deletedLeadIds.has(contact.leadId));
-    db.runs = db.runs.filter((run) => {
-      if (run.kind === "lead-search") {
-        return getSheetKeyFromRun(run) !== sheetKey;
-      }
-
-      const sourceRunId =
-        typeof run.input.sourceRunId === "string" ? run.input.sourceRunId.trim() : null;
-      const scope = run.input.scope === "all-pending" ? "all-pending" : "run";
-
-      if (scope === "run" && sourceRunId && deletedSearchRunIds.has(sourceRunId)) {
-        return false;
-      }
-
-      return true;
-    });
-    db.searchJobs = db.searchJobs.filter((job) => !deletedSearchRunIds.has(job.runId));
-    db.enrichmentJobs = db.enrichmentJobs.filter((job) => {
-      const relatedRun = db.runs.find((run) => run.id === job.runId);
-      return Boolean(relatedRun);
-    });
-    const deletedAuditJobIds = new Set(
-      db.auditJobs
-        .filter((job) => {
-          if (job.sheetKey === sheetKey) {
-            return true;
-          }
-
-          return Boolean(job.sourceRunId && deletedSearchRunIds.has(job.sourceRunId));
-        })
-        .map((job) => job.id),
-    );
-    const deletedSequenceIds = new Set(
-      db.generatedSequences
-        .filter((sequence) => deletedLeadIds.has(sequence.leadId))
-        .map((sequence) => sequence.id),
-    );
-    const deletedThreadIds = new Set(
-      db.emailThreads
-        .filter((thread) => deletedLeadIds.has(thread.leadId ?? ""))
-        .map((thread) => thread.id),
-    );
-    db.auditJobs = db.auditJobs.filter((job) => !deletedAuditJobIds.has(job.id));
-    db.auditFindings = db.auditFindings.filter(
-      (finding) => !deletedLeadIds.has(finding.leadId) && !deletedAuditJobIds.has(finding.jobId),
-    );
-    db.prospectVariables = db.prospectVariables.filter(
-      (variable) => !deletedLeadIds.has(variable.leadId),
-    );
-    db.generatedSequences = db.generatedSequences.filter(
-      (sequence) => !deletedLeadIds.has(sequence.leadId),
-    );
-    db.outreachStates = db.outreachStates.filter(
-      (state) =>
-        !deletedLeadIds.has(state.leadId) &&
-        !deletedSequenceIds.has(state.sequenceId ?? "") &&
-        !deletedThreadIds.has(state.threadId ?? ""),
-    );
-    db.emailThreads = db.emailThreads.filter((thread) => !deletedThreadIds.has(thread.id));
-    db.emailMessages = db.emailMessages.filter(
-      (message) => !deletedThreadIds.has(message.threadId),
-    );
+    pruneExpiredTrashEntries(db);
+    moveSheetToTrash(db, sheetKey);
   });
 
-  revalidatePath("/workspace");
-  revalidatePath("/outreach");
-  redirect("/workspace");
+  revalidatePrimaryViews();
+  redirect("/workspace?tab=trash");
+}
+
+export async function deleteLeadAction(leadId: string) {
+  await mutateDb((db) => {
+    pruneExpiredTrashEntries(db);
+    moveLeadToTrash(db, leadId);
+  });
+
+  revalidatePrimaryViews();
+}
+
+export async function deleteContactAction(contactId: string) {
+  await mutateDb((db) => {
+    pruneExpiredTrashEntries(db);
+    moveContactToTrash(db, contactId);
+  });
+
+  revalidatePrimaryViews();
+}
+
+export async function deleteCampaignAction(campaignId: string) {
+  await mutateDb((db) => {
+    pruneExpiredTrashEntries(db);
+    moveCampaignToTrash(db, campaignId);
+  });
+
+  revalidatePrimaryViews();
+}
+
+export async function deleteOpportunityAction(opportunityId: string) {
+  await mutateDb((db) => {
+    pruneExpiredTrashEntries(db);
+    moveOpportunityToTrash(db, opportunityId);
+  });
+
+  revalidatePrimaryViews();
+}
+
+export async function deleteProposalAction(proposalId: string) {
+  await mutateDb((db) => {
+    pruneExpiredTrashEntries(db);
+    moveProposalToTrash(db, proposalId);
+  });
+
+  revalidatePrimaryViews();
+}
+
+export async function deleteClientAction(clientId: string) {
+  await mutateDb((db) => {
+    pruneExpiredTrashEntries(db);
+    moveClientToTrash(db, clientId);
+  });
+
+  revalidatePrimaryViews();
+}
+
+export async function deleteProjectAction(projectId: string) {
+  await mutateDb((db) => {
+    pruneExpiredTrashEntries(db);
+    moveProjectToTrash(db, projectId);
+  });
+
+  revalidatePrimaryViews();
+}
+
+export async function deleteReportAction(reportId: string) {
+  await mutateDb((db) => {
+    pruneExpiredTrashEntries(db);
+    moveReportToTrash(db, reportId);
+  });
+
+  revalidatePrimaryViews();
+}
+
+export async function restoreTrashEntryAction(trashEntryId: string) {
+  await mutateDb((db) => {
+    pruneExpiredTrashEntries(db);
+    restoreTrashEntry(db, trashEntryId);
+  });
+
+  revalidatePrimaryViews();
+}
+
+export async function deleteTrashEntryAction(trashEntryId: string) {
+  await mutateDb((db) => {
+    pruneExpiredTrashEntries(db);
+    db.trashEntries = db.trashEntries.filter((entry) => entry.id !== trashEntryId);
+  });
+
+  revalidatePrimaryViews();
 }
 
 export async function updateLeadCrmAction(formData: FormData) {

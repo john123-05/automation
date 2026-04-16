@@ -36,6 +36,7 @@ export const salesMachineTables = {
   serviceOfferProfiles: "sales_machine_service_offer_profiles",
   reportingConnections: "sales_machine_reporting_connections",
   monthlyReports: "sales_machine_monthly_reports",
+  trashEntries: "sales_machine_trash_entries",
 } as const;
 
 let cachedClient: SupabaseClient | null = null;

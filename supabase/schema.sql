@@ -543,6 +543,17 @@ create table if not exists public.sales_machine_monthly_reports (
   updated_at timestamptz not null
 );
 
+create table if not exists public.sales_machine_trash_entries (
+  id text primary key,
+  entity_type text not null,
+  entity_id text not null,
+  label text not null,
+  summary text not null,
+  deleted_at timestamptz not null,
+  expires_at timestamptz not null,
+  payload jsonb not null default '{}'::jsonb
+);
+
 alter table public.sales_machine_website_audit_jobs
   add column if not exists campaign_id text;
 
@@ -659,3 +670,6 @@ create index if not exists sales_machine_reporting_connections_client_id_idx
 
 create index if not exists sales_machine_monthly_reports_client_id_idx
   on public.sales_machine_monthly_reports (client_id, generated_at desc);
+
+create index if not exists sales_machine_trash_entries_expires_at_idx
+  on public.sales_machine_trash_entries (expires_at desc);

@@ -3,6 +3,7 @@ import path from "node:path";
 import { unstable_cache, revalidateTag } from "next/cache";
 import { getBillingOverview } from "@/lib/billing/overview";
 import { getStorageMode } from "@/lib/env";
+import { pruneExpiredTrashEntries } from "@/lib/sales-machine/recycle-bin";
 import { ensureAgencySeedData } from "@/lib/sales-machine/agency-seeds";
 import { ensureOutreachSeedData } from "@/lib/sales-machine/outreach-seeds";
 import { getSupabaseAdminClient, salesMachineTables } from "@/lib/sales-machine/supabase";
@@ -42,6 +43,7 @@ import type {
   ServiceOfferProfile,
   ServiceProfile,
   SuppressionEntry,
+  TrashEntry,
   WebsiteAuditFinding,
   WebsiteAuditJob,
   WorkflowRun,
@@ -538,6 +540,17 @@ type MonthlyReportRow = {
   updated_at: string;
 };
 
+type TrashEntryRow = {
+  id: string;
+  entity_type: TrashEntry["entityType"];
+  entity_id: string;
+  label: string;
+  summary: string;
+  deleted_at: string;
+  expires_at: string;
+  payload: TrashEntry["payload"];
+};
+
 const dataDirectory = path.join(process.cwd(), ".data");
 const databasePath = path.join(dataDirectory, "sales-machine.json");
 
@@ -581,6 +594,7 @@ const emptyDb = (): SalesMachineDb => ({
   serviceOfferProfiles: [],
   reportingConnections: [],
   monthlyReports: [],
+  trashEntries: [],
 });
 
 let mutationQueue: Promise<SalesMachineDb | null> = Promise.resolve(null);
@@ -651,6 +665,7 @@ function ensureArrays(value: Partial<SalesMachineDb> | null | undefined): SalesM
     serviceOfferProfiles: value?.serviceOfferProfiles ?? [],
     reportingConnections: value?.reportingConnections ?? [],
     monthlyReports: value?.monthlyReports ?? [],
+    trashEntries: value?.trashEntries ?? [],
   } satisfies SalesMachineDb;
 
   ensureOutreachSeedData(db);
@@ -1826,6 +1841,32 @@ function monthlyReportToRow(entry: MonthlyReport): MonthlyReportRow {
   };
 }
 
+function trashEntryFromRow(row: TrashEntryRow): TrashEntry {
+  return {
+    id: row.id,
+    entityType: row.entity_type,
+    entityId: row.entity_id,
+    label: row.label,
+    summary: row.summary,
+    deletedAt: row.deleted_at,
+    expiresAt: row.expires_at,
+    payload: row.payload ?? {},
+  };
+}
+
+function trashEntryToRow(entry: TrashEntry): TrashEntryRow {
+  return {
+    id: entry.id,
+    entity_type: entry.entityType,
+    entity_id: entry.entityId,
+    label: entry.label,
+    summary: entry.summary,
+    deleted_at: entry.deletedAt,
+    expires_at: entry.expiresAt,
+    payload: entry.payload,
+  };
+}
+
 async function readSupabaseTable<Row>(tableName: string, optional = false) {
   const client = getSupabaseAdminClient();
   const result = await client.from(tableName).select("*");
@@ -1869,6 +1910,7 @@ async function readSupabaseDb() {
     serviceOfferProfileRows,
     reportingConnectionRows,
     monthlyReportRows,
+    trashEntryRows,
   ] = await Promise.all([
     readSupabaseTable<LeadRow>(salesMachineTables.leads),
     readSupabaseTable<LeadCrmMetadataRow>(salesMachineTables.leadCrmMetadata, true),
@@ -1904,6 +1946,7 @@ async function readSupabaseDb() {
     readSupabaseTable<ServiceOfferProfileRow>(salesMachineTables.serviceOfferProfiles, true),
     readSupabaseTable<ReportingConnectionRow>(salesMachineTables.reportingConnections, true),
     readSupabaseTable<MonthlyReportRow>(salesMachineTables.monthlyReports, true),
+    readSupabaseTable<TrashEntryRow>(salesMachineTables.trashEntries, true),
   ]);
 
   const remoteDb = ensureArrays({
@@ -1941,6 +1984,7 @@ async function readSupabaseDb() {
     serviceOfferProfiles: serviceOfferProfileRows.map(serviceOfferProfileFromRow),
     reportingConnections: reportingConnectionRows.map(reportingConnectionFromRow),
     monthlyReports: monthlyReportRows.map(monthlyReportFromRow),
+    trashEntries: trashEntryRows.map(trashEntryFromRow),
   });
 
   const localDb = await readLocalDb().catch(() => ensureArrays(undefined));
@@ -1977,6 +2021,7 @@ async function readSupabaseDb() {
     serviceOfferProfiles: mergeById(remoteDb.serviceOfferProfiles, localDb.serviceOfferProfiles),
     reportingConnections: mergeById(remoteDb.reportingConnections, localDb.reportingConnections),
     monthlyReports: mergeById(remoteDb.monthlyReports, localDb.monthlyReports),
+    trashEntries: mergeById(remoteDb.trashEntries, localDb.trashEntries),
   });
 }
 
@@ -1991,6 +2036,7 @@ function isOutreachStorageFallbackError(error: unknown) {
 
   return (
     message.includes("run supabase/schema.sql") ||
+    message.includes("sales_machine_trash_entries") ||
     message.includes("sales_machine_runs_kind_check") ||
     message.includes("violates check constraint")
   );
@@ -2253,6 +2299,12 @@ async function writeSupabaseDb(before: SalesMachineDb, after: SalesMachineDb) {
     after.monthlyReports.map(monthlyReportToRow),
     { onMissing: "skip" },
   );
+  await syncTable(
+    salesMachineTables.trashEntries,
+    before.trashEntries,
+    after.trashEntries.map(trashEntryToRow),
+    { onMissing: "error" },
+  );
 }
 
 export async function readDb() {
@@ -2279,9 +2331,11 @@ export async function mutateDb<T>(mutator: (db: SalesMachineDb) => Promise<T> | 
     // serverless invocation even after revalidateTag, causing "Step not found" errors
     // and ON CONFLICT upsert failures when two mutations happen in quick succession.
     const before = prevState ?? await readDb();
+    pruneExpiredTrashEntries(before);
     const next = structuredClone(before) as SalesMachineDb;
     ensureOutreachSeedData(next);
     const result = await mutator(next);
+    pruneExpiredTrashEntries(next);
 
     if (getStorageMode() === "supabase") {
       try {
@@ -2449,6 +2503,7 @@ export async function getOutreachSnapshot(): Promise<OutreachSnapshot> {
   const reminders = [...db.reminders].sort((a, b) => a.dueAt.localeCompare(b.dueAt));
   const activityNotes = [...db.activityNotes].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   const monthlyReports = [...db.monthlyReports].sort((a, b) => b.generatedAt.localeCompare(a.generatedAt));
+  const trashEntries = [...db.trashEntries].sort((a, b) => b.deletedAt.localeCompare(a.deletedAt));
   const sheets = buildWorkspaceSheets({
     leads,
     contacts,
@@ -2516,6 +2571,7 @@ export async function getOutreachSnapshot(): Promise<OutreachSnapshot> {
       b.updatedAt.localeCompare(a.updatedAt),
     ),
     monthlyReports,
+    trashEntries,
     sheets,
     stats: {
       auditJobCount: auditJobs.length,

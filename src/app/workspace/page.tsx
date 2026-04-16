@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import {
   addActivityNoteAction,
@@ -8,12 +9,22 @@ import {
   createProjectAction,
   createReminderAction,
   createReportingConnectionAction,
+  deleteCampaignAction,
+  deleteClientAction,
+  deleteContactAction,
+  deleteLeadAction,
+  deleteOpportunityAction,
+  deleteProjectAction,
+  deleteProposalAction,
+  deleteReportAction,
   deleteRunAction,
+  deleteTrashEntryAction,
   deleteSheetAction,
   generateMonthlyReportAction,
   generateProposalAction,
   requestClientAssetAction,
   renameSheetAction,
+  restoreTrashEntryAction,
   updateOpportunityStageAction,
   updateProjectTaskAction,
   updateProposalStatusAction,
@@ -37,6 +48,7 @@ import {
   workspaceTabs,
 } from "@/lib/sales-machine/workspace-crm";
 import { formatServiceLabel, getCampaignStatusClasses, getOutreachStateClasses } from "@/lib/sales-machine/outreach-ui";
+import { TRASH_RETENTION_DAYS } from "@/lib/sales-machine/recycle-bin";
 import { formatDateTime } from "@/lib/sales-machine/utils";
 import {
   buildWorkspaceSheets,
@@ -176,8 +188,8 @@ function TableCard({
   children,
 }: Readonly<{
   title: string;
-  actions?: React.ReactNode;
-  children: React.ReactNode;
+  actions?: ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <section className="glass-panel rounded-[24px] p-4 sm:rounded-[32px] sm:p-6">
@@ -187,6 +199,203 @@ function TableCard({
       </div>
       {children}
     </section>
+  );
+}
+
+function DeleteButton({
+  label,
+  formAction,
+}: Readonly<{
+  label: string;
+  formAction?: string | ((formData: FormData) => void);
+}>) {
+  return (
+    <button
+      type="submit"
+      formAction={formAction}
+      className="inline-flex min-w-[92px] items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100"
+      title={`Moves this item into the recycle bin for ${TRASH_RETENTION_DAYS} days.`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function formatTrashEntityLabel(value: string) {
+  switch (value) {
+    case "lead":
+      return "Company";
+    case "contact":
+      return "Contact";
+    case "sheet":
+      return "Source";
+    case "run":
+      return "Run";
+    case "campaign":
+      return "Campaign";
+    case "opportunity":
+      return "Opportunity";
+    case "proposal":
+      return "Proposal";
+    case "client":
+      return "Client";
+    case "project":
+      return "Project";
+    case "report":
+      return "Report";
+    default:
+      return value;
+  }
+}
+
+function CompactStatCard({
+  label,
+  value,
+}: Readonly<{
+  label: string;
+  value: number;
+}>) {
+  return (
+    <div className="rounded-[14px] border border-line bg-white/60 px-3 py-2.5 sm:rounded-[16px] sm:px-3.5 sm:py-3">
+      <p className="text-[9px] uppercase tracking-[0.14em] text-slate-500 sm:text-[10px]">
+        {label}
+      </p>
+      <p className="mt-1 text-lg font-semibold text-slate-950 sm:text-[22px]">{value}</p>
+    </div>
+  );
+}
+
+function SourceSelector({
+  sheets,
+  activeSheet,
+  activeTab,
+  query,
+  savedView,
+  selectedLeadId,
+  totalLeadCount,
+  compact = false,
+}: Readonly<{
+  sheets: Array<{
+    key: string;
+    label: string;
+    leadCount: number;
+  }>;
+  activeSheet: { key: string; label: string; leadCount: number } | null;
+  activeTab: WorkspaceTab;
+  query: string;
+  savedView: string | null;
+  selectedLeadId: string | null;
+  totalLeadCount: number;
+  compact?: boolean;
+}>) {
+  const orderedSheets = [...sheets].sort((left, right) => left.label.localeCompare(right.label));
+  const currentLabel = activeSheet?.label ?? "All sources";
+  const currentCount = activeSheet?.leadCount ?? totalLeadCount;
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <details className="group relative">
+        <summary
+          className={`flex cursor-pointer list-none items-center justify-between gap-3 rounded-full border border-line bg-white/80 text-slate-900 transition hover:bg-white [&::-webkit-details-marker]:hidden ${
+            compact ? "min-w-[220px] px-4 py-2.5 text-sm" : "min-w-[260px] px-4 py-2.5 text-sm"
+          }`}
+        >
+          <span className="min-w-0">
+            <span className="block text-[10px] uppercase tracking-[0.18em] text-slate-500">
+              Source
+            </span>
+            <span className="block truncate font-medium">{currentLabel}</span>
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+              {currentCount}
+            </span>
+            <span className="text-xs text-slate-500">▼</span>
+          </span>
+        </summary>
+
+        <div className="absolute left-0 top-[calc(100%+0.5rem)] z-30 w-[min(380px,calc(100vw-2rem))] rounded-[18px] border border-line bg-white/95 p-2 shadow-[0_20px_60px_rgba(20,32,38,0.12)] backdrop-blur-md">
+          <div className="max-h-[320px] overflow-y-auto">
+            <Link
+              href={buildWorkspaceHref({
+                tab: activeTab,
+                q: query || null,
+                view: savedView,
+                leadId: selectedLeadId,
+              })}
+              className={`flex items-center justify-between rounded-[12px] px-3 py-2.5 text-sm transition ${
+                !activeSheet ? "bg-slate-950 text-white" : "text-slate-800 hover:bg-slate-50"
+              }`}
+            >
+              <span>All sources</span>
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs ${
+                  !activeSheet ? "bg-white/15 text-white" : "bg-slate-100 text-slate-700"
+                }`}
+              >
+                {totalLeadCount}
+              </span>
+            </Link>
+
+            <div className="my-2 border-t border-line" />
+
+            <div className="space-y-1">
+              {orderedSheets.map((sheet) => {
+                const active = activeSheet?.key === sheet.key;
+
+                return (
+                  <div
+                    key={sheet.key}
+                    className={`flex items-center gap-2 rounded-[12px] px-1 py-1 transition ${
+                      active ? "bg-slate-950 text-white" : "text-slate-800 hover:bg-slate-50"
+                    }`}
+                  >
+                    <Link
+                      href={buildWorkspaceHref({
+                        tab: activeTab,
+                        sheet: sheet.key,
+                        q: query || null,
+                        view: savedView,
+                        leadId: selectedLeadId,
+                      })}
+                      className="flex min-w-0 flex-1 items-center justify-between gap-3 px-2 py-1.5 text-sm"
+                    >
+                      <span className="min-w-0 truncate">{sheet.label}</span>
+                      <span
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${
+                          active ? "bg-white/15 text-white" : "bg-slate-100 text-slate-700"
+                        }`}
+                      >
+                        {sheet.leadCount}
+                      </span>
+                    </Link>
+                    <form action={deleteSheetAction.bind(null, sheet.key)}>
+                      <button
+                        type="submit"
+                        className={`inline-flex items-center justify-center rounded-full border px-2.5 py-1 text-[11px] font-medium transition ${
+                          active
+                            ? "border-white/20 bg-white/10 text-white hover:bg-white/15"
+                            : "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
+                        }`}
+                        title="Delete source"
+                      >
+                        Delete
+                      </button>
+                    </form>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </details>
+
+      {activeSheet ? (
+        <form action={deleteSheetAction.bind(null, activeSheet.key)}>
+          <DeleteButton label="Delete source" />
+        </form>
+      ) : null}
+    </div>
   );
 }
 
@@ -300,6 +509,11 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
   const selectedLeadId = readSearchParam(params.leadId);
 
   const sheets = buildWorkspaceSheets(snapshot);
+  const sourceSelectorSheets = sheets.map((sheet) => ({
+    key: sheet.key,
+    label: sheet.label,
+    leadCount: sheet.leadCount,
+  }));
   const activeSheet = sheets.find((sheet) => sheet.key === requestedSheet) ?? null;
   const activeSearchRunIds = new Set(activeSheet?.searchRunIds ?? []);
   const companyRecords = buildWorkspaceCompanyRecords(snapshot, {
@@ -373,6 +587,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
   const reports = snapshot.monthlyReports
     .filter((report) => visibleClientIds.has(report.clientId))
     .sort((a, b) => b.generatedAt.localeCompare(a.generatedAt));
+  const trashEntries = snapshot.trashEntries;
   const reportingConnections = snapshot.reportingConnections.filter((connection) =>
     visibleClientIds.has(connection.clientId),
   );
@@ -495,36 +710,24 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
 
                 <div className="space-y-3 border-t border-line pt-4">
                   <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Sources</p>
-                  <div className="flex flex-wrap gap-2">
-                    <Link
-                      href={buildWorkspaceHref({ tab: activeTab, q: query || null, view: savedView })}
-                      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
-                        !activeSheet
-                          ? "bg-slate-950 text-white"
-                          : "border border-line bg-white text-slate-800 hover:bg-slate-50"
-                      }`}
-                    >
-                      All sources
-                    </Link>
-                    {sheets.map((sheet) => (
-                      <Link
-                        key={sheet.key}
-                        href={buildWorkspaceHref({
-                          tab: activeTab,
-                          sheet: sheet.key,
-                          q: query || null,
-                          view: savedView,
-                        })}
-                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
-                          activeSheet?.key === sheet.key
-                            ? "bg-slate-950 text-white"
-                            : "border border-line bg-white text-slate-800 hover:bg-slate-50"
-                        }`}
-                      >
-                        {sheet.label}
-                      </Link>
-                    ))}
-                  </div>
+                  <SourceSelector
+                    sheets={sourceSelectorSheets}
+                    activeSheet={
+                      activeSheet
+                        ? {
+                            key: activeSheet.key,
+                            label: activeSheet.label,
+                            leadCount: activeSheet.leadCount,
+                          }
+                        : null
+                    }
+                    activeTab={activeTab}
+                    query={query}
+                    savedView={savedView}
+                    selectedLeadId={selectedRecord?.lead.id ?? null}
+                    totalLeadCount={snapshot.leads.length}
+                    compact
+                  />
                 </div>
 
                 <div className="space-y-3 border-t border-line pt-4">
@@ -584,38 +787,24 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
           </div>
         </div>
 
-        <div className="mt-5 hidden flex-wrap items-center gap-3 lg:flex">
-          <Link
-            href={buildWorkspaceHref({ tab: activeTab, q: query || null, view: savedView })}
-            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
-              !activeSheet
-                ? "bg-slate-950 text-white"
-                : "border border-line bg-white/80 text-slate-800 hover:bg-white"
-            }`}
-          >
-            All sources
-            <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs">{snapshot.leads.length}</span>
-          </Link>
-
-          {sheets.map((sheet) => (
-            <Link
-              key={sheet.key}
-              href={buildWorkspaceHref({
-                tab: activeTab,
-                sheet: sheet.key,
-                q: query || null,
-                view: savedView,
-              })}
-              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
-                activeSheet?.key === sheet.key
-                  ? "bg-slate-950 text-white"
-                  : "border border-line bg-white/80 text-slate-800 hover:bg-white"
-              }`}
-            >
-              <span>{sheet.label}</span>
-              <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs">{sheet.leadCount}</span>
-            </Link>
-          ))}
+        <div className="mt-5 hidden lg:flex">
+          <SourceSelector
+            sheets={sourceSelectorSheets}
+            activeSheet={
+              activeSheet
+                ? {
+                    key: activeSheet.key,
+                    label: activeSheet.label,
+                    leadCount: activeSheet.leadCount,
+                  }
+                : null
+            }
+            activeTab={activeTab}
+            query={query}
+            savedView={savedView}
+            selectedLeadId={selectedRecord?.lead.id ?? null}
+            totalLeadCount={snapshot.leads.length}
+          />
         </div>
 
         <div className="mt-5 hidden flex-wrap items-center gap-3 lg:flex">
@@ -665,39 +854,15 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
           })}
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:gap-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-8">
-          <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
-            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Companies</p>
-            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.companyCount}</p>
-          </div>
-          <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
-            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Contacts</p>
-            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.contactCount}</p>
-          </div>
-          <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
-            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Campaigns</p>
-            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.campaignCount}</p>
-          </div>
-          <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
-            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Replies</p>
-            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.repliedCount}</p>
-          </div>
-          <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
-            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Booked</p>
-            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.bookedCount}</p>
-          </div>
-          <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
-            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Needs attention</p>
-            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.needsAttentionCount}</p>
-          </div>
-          <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
-            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Opportunities</p>
-            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.openOpportunities}</p>
-          </div>
-          <div className="rounded-[18px] border border-line bg-white/75 p-3 sm:rounded-[22px] sm:p-4">
-            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.22em]">Clients</p>
-            <p className="mt-1.5 text-xl font-semibold text-slate-950 sm:mt-2 sm:text-2xl">{kpis.activeClients}</p>
-          </div>
+        <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-5 sm:gap-2.5 md:grid-cols-4 xl:grid-cols-8">
+          <CompactStatCard label="Companies" value={kpis.companyCount} />
+          <CompactStatCard label="Contacts" value={kpis.contactCount} />
+          <CompactStatCard label="Campaigns" value={kpis.campaignCount} />
+          <CompactStatCard label="Replies" value={kpis.repliedCount} />
+          <CompactStatCard label="Booked" value={kpis.bookedCount} />
+          <CompactStatCard label="Needs attention" value={kpis.needsAttentionCount} />
+          <CompactStatCard label="Opportunities" value={kpis.openOpportunities} />
+          <CompactStatCard label="Clients" value={kpis.activeClients} />
         </div>
       </section>
 
@@ -921,6 +1086,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                       <th className="px-4 py-3 font-medium">Latest touch</th>
                       <th className="px-4 py-3 font-medium">Next action</th>
                       <th className="px-4 py-3 font-medium">Priority</th>
+                      <th className="px-4 py-3 font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -986,11 +1152,14 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                           <td className="px-4 py-3 text-slate-700">
                             {record.crm ? formatPriorityLabel(record.crm.priority) : "Medium"}
                           </td>
+                          <td className="px-4 py-3">
+                            <DeleteButton label="Delete" formAction={deleteLeadAction.bind(null, record.lead.id)} />
+                          </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={10} className="px-4 py-10 text-center text-slate-600">
+                        <td colSpan={11} className="px-4 py-10 text-center text-slate-600">
                           No companies match this view yet.
                         </td>
                       </tr>
@@ -1038,6 +1207,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                       <th className="px-4 py-3 font-medium">Email</th>
                       <th className="px-4 py-3 font-medium">Confidence</th>
                       <th className="px-4 py-3 font-medium">Preferred</th>
+                      <th className="px-4 py-3 font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1056,11 +1226,17 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                           <td className="px-4 py-3 text-slate-700">
                             {record.preferredContact?.id === contact.id ? "Yes" : ""}
                           </td>
+                          <td className="px-4 py-3">
+                            
+<form action={deleteContactAction.bind(null, contact.id)}>
+                              <DeleteButton label="Delete" />
+                            </form>
+                          </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={6} className="px-4 py-10 text-center text-slate-600">
+                        <td colSpan={7} className="px-4 py-10 text-center text-slate-600">
                           No contacts in this view yet.
                         </td>
                       </tr>
@@ -1089,6 +1265,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                       <th className="px-4 py-3 font-medium">Nurture</th>
                       <th className="px-4 py-3 font-medium">Closed</th>
                       <th className="px-4 py-3 font-medium">Status</th>
+                      <th className="px-4 py-3 font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1119,12 +1296,18 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                                 {campaign.status}
                               </span>
                             </td>
+                            <td className="px-4 py-3">
+                              
+<form action={deleteCampaignAction.bind(null, campaign.id)}>
+                                <DeleteButton label="Delete" />
+                              </form>
+                            </td>
                           </tr>
                         );
                       })
                     ) : (
                       <tr>
-                        <td colSpan={12} className="px-4 py-10 text-center text-slate-600">
+                        <td colSpan={13} className="px-4 py-10 text-center text-slate-600">
                           No campaigns for this source yet.
                         </td>
                       </tr>
@@ -1210,6 +1393,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                       <th className="px-4 py-3 font-medium">Last touch</th>
                       <th className="px-4 py-3 font-medium">Proposal</th>
                       <th className="px-4 py-3 font-medium">Meeting</th>
+                      <th className="px-4 py-3 font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1266,12 +1450,18 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                             <td className="px-4 py-3 text-slate-700">
                               {meeting ? `${meeting.status.replace(/_/g, " ")} · ${formatDateTime(meeting.scheduledAt)}` : "Not booked"}
                             </td>
+                            <td className="px-4 py-3">
+                              
+<form action={deleteOpportunityAction.bind(null, opportunity.id)}>
+                                <DeleteButton label="Delete" />
+                              </form>
+                            </td>
                           </tr>
                         );
                       })
                     ) : (
                       <tr>
-                        <td colSpan={10} className="px-4 py-10 text-center text-slate-600">
+                        <td colSpan={11} className="px-4 py-10 text-center text-slate-600">
                           No opportunities in this source yet.
                         </td>
                       </tr>
@@ -1362,6 +1552,10 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                                     </button>
                                   </form>
                                 ) : null}
+                                
+<form action={deleteProposalAction.bind(null, proposal.id)}>
+                                  <DeleteButton label="Delete" />
+                                </form>
                               </div>
                             </td>
                           </tr>
@@ -1397,9 +1591,15 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                             <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Client</p>
                             <h3 className="mt-2 text-xl font-semibold text-slate-950">{lead?.companyName ?? "Unknown"}</h3>
                           </div>
-                          <span className={`rounded-full px-3 py-1 text-xs font-medium ${clientStatusClasses(client.status)}`}>
-                            {client.status}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className={`rounded-full px-3 py-1 text-xs font-medium ${clientStatusClasses(client.status)}`}>
+                              {client.status}
+                            </span>
+                            
+<form action={deleteClientAction.bind(null, client.id)}>
+                              <DeleteButton label="Delete" />
+                            </form>
+                          </div>
                         </div>
                         <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
                           <div>
@@ -1460,9 +1660,15 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                             <h3 className="mt-2 text-xl font-semibold text-slate-950">{project.name}</h3>
                             <p className="mt-1 text-sm text-slate-500">{lead?.companyName ?? "Unknown client"}</p>
                           </div>
-                          <span className={`rounded-full px-3 py-1 text-xs font-medium ${projectStatusClasses(project.status)}`}>
-                            {project.status.replace(/_/g, " ")}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className={`rounded-full px-3 py-1 text-xs font-medium ${projectStatusClasses(project.status)}`}>
+                              {project.status.replace(/_/g, " ")}
+                            </span>
+                            
+<form action={deleteProjectAction.bind(null, project.id)}>
+                              <DeleteButton label="Delete" />
+                            </form>
+                          </div>
                         </div>
                         <div className="mt-4 space-y-2">
                           {tasks.length ? (
@@ -1505,6 +1711,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                       <th className="px-4 py-3 font-medium">Sources</th>
                       <th className="px-4 py-3 font-medium">Summary</th>
                       <th className="px-4 py-3 font-medium">Doc</th>
+                      <th className="px-4 py-3 font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1535,12 +1742,18 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                                 "In app only"
                               )}
                             </td>
+                            <td className="px-4 py-3">
+                              
+<form action={deleteReportAction.bind(null, report.id)}>
+                                <DeleteButton label="Delete" />
+                              </form>
+                            </td>
                           </tr>
                         );
                       })
                     ) : (
                       <tr>
-                        <td colSpan={6} className="px-4 py-10 text-center text-slate-600">
+                        <td colSpan={7} className="px-4 py-10 text-center text-slate-600">
                           No monthly reports drafted yet.
                         </td>
                       </tr>
@@ -1605,7 +1818,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                           type="submit"
                           className="inline-flex items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-medium text-rose-700 transition hover:border-rose-300 hover:bg-rose-100"
                         >
-                          Delete Source
+                          Move Source to Trash
                         </button>
                       </form>
                     ) : null}
@@ -1622,10 +1835,11 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                         <th className="px-4 py-3 font-medium">Status</th>
                         <th className="px-4 py-3 font-medium">Niche</th>
                         <th className="px-4 py-3 font-medium">Location</th>
-                        <th className="px-4 py-3 font-medium">Website</th>
-                        <th className="px-4 py-3 font-medium">Phone</th>
-                        <th className="px-4 py-3 font-medium">Contacts</th>
-                        <th className="px-4 py-3 font-medium">Updated</th>
+                      <th className="px-4 py-3 font-medium">Website</th>
+                      <th className="px-4 py-3 font-medium">Phone</th>
+                      <th className="px-4 py-3 font-medium">Contacts</th>
+                      <th className="px-4 py-3 font-medium">Updated</th>
+                      <th className="px-4 py-3 font-medium">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1657,11 +1871,17 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                             </td>
                             <td className="px-4 py-3 text-slate-700">{lead.contactCount}</td>
                             <td className="px-4 py-3 text-slate-700">{formatDateTime(lead.updatedAt)}</td>
+                            <td className="px-4 py-3">
+                              
+<form action={deleteLeadAction.bind(null, lead.id)}>
+                                <DeleteButton label="Delete" />
+                              </form>
+                            </td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={8} className="px-4 py-10 text-center text-slate-600">
+                          <td colSpan={9} className="px-4 py-10 text-center text-slate-600">
                             No leads are saved in this source yet.
                           </td>
                         </tr>
@@ -1683,6 +1903,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                         <th className="px-4 py-3 font-medium">LinkedIn</th>
                         <th className="px-4 py-3 font-medium">Confidence</th>
                         <th className="px-4 py-3 font-medium">Found</th>
+                        <th className="px-4 py-3 font-medium">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1698,12 +1919,18 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                               <td className="px-4 py-3 text-slate-700">{contact.linkedin ?? "NA"}</td>
                               <td className="px-4 py-3 text-slate-700">{contact.confidence}</td>
                               <td className="px-4 py-3 text-slate-700">{formatDateTime(contact.discoveredAt)}</td>
+                              <td className="px-4 py-3">
+                                
+<form action={deleteContactAction.bind(null, contact.id)}>
+                                  <DeleteButton label="Delete" />
+                                </form>
+                              </td>
                             </tr>
                           );
                         })
                       ) : (
                         <tr>
-                          <td colSpan={7} className="px-4 py-10 text-center text-slate-600">
+                          <td colSpan={8} className="px-4 py-10 text-center text-slate-600">
                             No contacts are saved in this source yet.
                           </td>
                         </tr>
@@ -1722,7 +1949,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                         <th className="px-4 py-3 font-medium">Status</th>
                         <th className="px-4 py-3 font-medium">Started</th>
                         <th className="px-4 py-3 font-medium">Summary</th>
-                        <th className="px-4 py-3 font-medium">Delete</th>
+                        <th className="px-4 py-3 font-medium">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1738,13 +1965,9 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                             <td className="px-4 py-3 text-slate-700">{formatDateTime(run.startedAt)}</td>
                             <td className="px-4 py-3 text-slate-700">{run.summary ?? "NA"}</td>
                             <td className="px-4 py-3">
-                              <form action={deleteRunAction.bind(null, run.id)}>
-                                <button
-                                  type="submit"
-                                  className="inline-flex items-center justify-center rounded-full border border-line bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
-                                >
-                                  Delete
-                                </button>
+                              
+<form action={deleteRunAction.bind(null, run.id)}>
+                                <DeleteButton label="Delete" />
                               </form>
                             </td>
                           </tr>
@@ -1761,6 +1984,71 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
                 </div>
               </TableCard>
             </>
+          ) : null}
+
+          {activeTab === "trash" ? (
+            <TableCard
+              title="Recycle Bin"
+              actions={
+                <p className="text-sm text-slate-500">
+                  Items stay here for {TRASH_RETENTION_DAYS} days before they are removed.
+                </p>
+              }
+            >
+              <div className="scroll-slim overflow-x-auto rounded-[24px] border border-line bg-white/70">
+                <table className="min-w-[1180px] w-full text-left text-sm">
+                  <thead className="bg-slate-950 text-white">
+                    <tr>
+                      <th className="px-4 py-3 font-medium">Type</th>
+                      <th className="px-4 py-3 font-medium">Label</th>
+                      <th className="px-4 py-3 font-medium">Contains</th>
+                      <th className="px-4 py-3 font-medium">Deleted</th>
+                      <th className="px-4 py-3 font-medium">Expires</th>
+                      <th className="px-4 py-3 font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {trashEntries.length ? (
+                      trashEntries.map((entry) => (
+                        <tr key={entry.id} className="border-t border-line align-top">
+                          <td className="px-4 py-3 text-slate-700">{formatTrashEntityLabel(entry.entityType)}</td>
+                          <td className="px-4 py-3 text-slate-950">{entry.label}</td>
+                          <td className="px-4 py-3 text-slate-700">{entry.summary}</td>
+                          <td className="px-4 py-3 text-slate-700">{formatDateTime(entry.deletedAt)}</td>
+                          <td className="px-4 py-3 text-slate-700">{formatDateTime(entry.expiresAt)}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-2">
+                              <form action={restoreTrashEntryAction.bind(null, entry.id)}>
+                                <button
+                                  type="submit"
+                                  className="inline-flex items-center justify-center rounded-full bg-slate-950 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-800"
+                                >
+                                  Restore
+                                </button>
+                              </form>
+                              <form action={deleteTrashEntryAction.bind(null, entry.id)}>
+                                <button
+                                  type="submit"
+                                  className="inline-flex items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-700 transition hover:bg-rose-100"
+                                >
+                                  Delete now
+                                </button>
+                              </form>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={6} className="px-4 py-10 text-center text-slate-600">
+                          The recycle bin is empty.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </TableCard>
           ) : null}
         </div>
 

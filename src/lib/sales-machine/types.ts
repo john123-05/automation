@@ -115,6 +115,18 @@ export type ReportingConnectionStatus = "setup_needed" | "connected" | "error";
 
 export type MonthlyReportStatus = "draft" | "ready" | "sent";
 
+export type TrashEntityType =
+  | "lead"
+  | "contact"
+  | "sheet"
+  | "run"
+  | "campaign"
+  | "opportunity"
+  | "proposal"
+  | "client"
+  | "project"
+  | "report";
+
 export type OpenAiRunSpend = {
   model: string;
   inputTokens: number;
@@ -652,6 +664,48 @@ export type MonthlyReport = {
   updatedAt: string;
 };
 
+export type TrashPayload = {
+  leads?: Lead[];
+  leadCrmMetadata?: LeadCrmMetadata[];
+  contacts?: Contact[];
+  runs?: WorkflowRun[];
+  searchJobs?: SearchJob[];
+  enrichmentJobs?: EnrichmentJob[];
+  auditJobs?: WebsiteAuditJob[];
+  auditFindings?: WebsiteAuditFinding[];
+  prospectVariables?: ProspectVariableSet[];
+  campaigns?: Campaign[];
+  campaignSteps?: CampaignStep[];
+  campaignLeads?: CampaignLead[];
+  generatedSequences?: GeneratedSequence[];
+  emailThreads?: EmailThread[];
+  emailMessages?: EmailMessage[];
+  outreachStates?: ProspectOutreachState[];
+  opportunities?: Opportunity[];
+  meetings?: Meeting[];
+  proposalDocuments?: ProposalDocument[];
+  clients?: Client[];
+  clientProjects?: ClientProject[];
+  projectTasks?: ProjectTask[];
+  clientAssets?: ClientAsset[];
+  clientAssetRequests?: ClientAssetRequest[];
+  reminders?: Reminder[];
+  activityNotes?: ActivityNote[];
+  reportingConnections?: ReportingConnection[];
+  monthlyReports?: MonthlyReport[];
+};
+
+export type TrashEntry = {
+  id: string;
+  entityType: TrashEntityType;
+  entityId: string;
+  label: string;
+  summary: string;
+  deletedAt: string;
+  expiresAt: string;
+  payload: TrashPayload;
+};
+
 export type SalesMachineDb = {
   leads: Lead[];
   leadCrmMetadata: LeadCrmMetadata[];
@@ -687,6 +741,7 @@ export type SalesMachineDb = {
   serviceOfferProfiles: ServiceOfferProfile[];
   reportingConnections: ReportingConnection[];
   monthlyReports: MonthlyReport[];
+  trashEntries: TrashEntry[];
 };
 
 export type LeadSearchInput = {
@@ -815,6 +870,7 @@ export type OutreachSnapshot = {
   serviceOfferProfiles: ServiceOfferProfile[];
   reportingConnections: ReportingConnection[];
   monthlyReports: MonthlyReport[];
+  trashEntries: TrashEntry[];
   sheets: Array<{
     key: string;
     label: string;
@@ -843,7 +899,8 @@ export type WorkspaceTab =
   | "clients"
   | "projects"
   | "reports"
-  | "data";
+  | "data"
+  | "trash";
 
 export type WorkspaceCompanyStage =
   | "new"

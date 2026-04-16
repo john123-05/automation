@@ -104,9 +104,9 @@ function RunCard({ run }: { run: WorkflowRun }) {
       <form action={deleteRunWithId} className="absolute right-4 top-4 z-10">
         <button
           type="submit"
-          aria-label={`Delete run ${run.id}`}
+          aria-label={`Move run ${run.id} to trash`}
           className="flex size-8 items-center justify-center rounded-full border border-line bg-white/90 text-sm font-semibold text-slate-500 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700"
-          title="Delete this run"
+          title="Move this run to trash"
         >
           ×
         </button>
