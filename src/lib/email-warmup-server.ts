@@ -3,7 +3,9 @@ import "server-only";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { calculateWarmupDaysLeft } from "@/lib/email-warmup-shared";
+import { getStorageMode } from "@/lib/env";
 import { createId } from "@/lib/sales-machine/utils";
+import { getSupabaseAdminClient } from "@/lib/sales-machine/supabase";
 
 export type WarmupAccount = {
   id: string;
@@ -14,6 +16,8 @@ export type WarmupAccount = {
 
 const WARMUP_DATA_DIR = path.join(process.cwd(), ".data");
 const WARMUP_DATA_PATH = path.join(WARMUP_DATA_DIR, "email-warmup-accounts.json");
+const WARMUP_STORAGE_BUCKET = "automation-state";
+const WARMUP_STORAGE_PATH = "email-warmup/accounts.json";
 
 const defaultWarmupAccounts: WarmupAccount[] = [
   {
@@ -44,7 +48,54 @@ function isValidIsoDate(value: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(`${value}T00:00:00.000Z`).getTime());
 }
 
-async function readWarmupAccountsFile() {
+function isMissingStorageObjectError(error: unknown) {
+  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+  return message.includes("not found") || message.includes("no such object");
+}
+
+function isMissingStorageBucketError(error: unknown) {
+  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+  return (
+    message.includes("bucket not found") ||
+    message.includes("not found") ||
+    message.includes("does not exist")
+  );
+}
+
+let ensureWarmupBucketPromise: Promise<void> | null = null;
+
+async function ensureWarmupBucket() {
+  if (!ensureWarmupBucketPromise) {
+    ensureWarmupBucketPromise = (async () => {
+      const client = getSupabaseAdminClient();
+      const { data, error } = await client.storage.getBucket(WARMUP_STORAGE_BUCKET);
+
+      if (!error && data) {
+        return;
+      }
+
+      if (error && !isMissingStorageBucketError(error)) {
+        throw new Error(error.message);
+      }
+
+      const { error: createError } = await client.storage.createBucket(WARMUP_STORAGE_BUCKET, {
+        public: false,
+        fileSizeLimit: 1024 * 1024,
+      });
+
+      if (createError && !createError.message.toLowerCase().includes("already exists")) {
+        throw new Error(createError.message);
+      }
+    })().catch((error) => {
+      ensureWarmupBucketPromise = null;
+      throw error;
+    });
+  }
+
+  await ensureWarmupBucketPromise;
+}
+
+async function readLocalWarmupAccountsFile() {
   try {
     const raw = await readFile(WARMUP_DATA_PATH, "utf8");
     const parsed = JSON.parse(raw) as WarmupAccount[];
@@ -59,9 +110,60 @@ async function readWarmupAccountsFile() {
   }
 }
 
-async function writeWarmupAccountsFile(accounts: WarmupAccount[]) {
+async function readSupabaseWarmupAccountsFile() {
+  await ensureWarmupBucket();
+
+  const client = getSupabaseAdminClient();
+  const { data, error } = await client.storage.from(WARMUP_STORAGE_BUCKET).download(WARMUP_STORAGE_PATH);
+
+  if (error) {
+    if (isMissingStorageObjectError(error)) {
+      return null;
+    }
+
+    throw new Error(error.message);
+  }
+
+  const raw = await data.text();
+  const parsed = JSON.parse(raw) as WarmupAccount[];
+
+  return Array.isArray(parsed) ? parsed : null;
+}
+
+async function readWarmupAccountsFile() {
+  return getStorageMode() === "supabase"
+    ? readSupabaseWarmupAccountsFile()
+    : readLocalWarmupAccountsFile();
+}
+
+async function writeLocalWarmupAccountsFile(accounts: WarmupAccount[]) {
   await mkdir(WARMUP_DATA_DIR, { recursive: true });
   await writeFile(WARMUP_DATA_PATH, JSON.stringify(accounts, null, 2));
+}
+
+async function writeSupabaseWarmupAccountsFile(accounts: WarmupAccount[]) {
+  await ensureWarmupBucket();
+
+  const client = getSupabaseAdminClient();
+  const { error } = await client.storage
+    .from(WARMUP_STORAGE_BUCKET)
+    .upload(WARMUP_STORAGE_PATH, JSON.stringify(accounts, null, 2), {
+      contentType: "application/json; charset=utf-8",
+      upsert: true,
+    });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+async function writeWarmupAccountsFile(accounts: WarmupAccount[]) {
+  if (getStorageMode() === "supabase") {
+    await writeSupabaseWarmupAccountsFile(accounts);
+    return;
+  }
+
+  await writeLocalWarmupAccountsFile(accounts);
 }
 
 export async function listWarmupAccounts() {
