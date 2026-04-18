@@ -472,10 +472,21 @@ export async function GET(request: Request) {
       syncedMessages,
     });
   } catch (error) {
-    await notifyServerIssue({
-      source: "api/inbox/sync",
-      error,
-    });
+    const msg = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+    const isTransient =
+      msg.includes("502") ||
+      msg.includes("503") ||
+      msg.includes("etimedout") ||
+      msg.includes("econnrefused") ||
+      msg.includes("econnreset") ||
+      msg.includes("bad gateway");
+
+    if (!isTransient) {
+      await notifyServerIssue({
+        source: "api/inbox/sync",
+        error,
+      });
+    }
 
     return NextResponse.json(
       {

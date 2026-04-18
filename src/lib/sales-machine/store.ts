@@ -2338,15 +2338,35 @@ export async function mutateDb<T>(mutator: (db: SalesMachineDb) => Promise<T> | 
     pruneExpiredTrashEntries(next);
 
     if (getStorageMode() === "supabase") {
-      try {
-        await writeSupabaseDb(before, next);
-        revalidateTag("sales-db", { expire: 0 });
-      } catch (error) {
-        if (!isOutreachStorageFallbackError(error)) {
-          throw error;
+      let writeError: unknown = null;
+
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          await writeSupabaseDb(before, next);
+          writeError = null;
+          break;
+        } catch (error) {
+          writeError = error;
+          const msg =
+            error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+
+          if (msg.includes("deadlock") && attempt < 2) {
+            await new Promise((resolve) => setTimeout(resolve, (attempt + 1) * 300));
+            continue;
+          }
+
+          break;
+        }
+      }
+
+      if (writeError !== null) {
+        if (!isOutreachStorageFallbackError(writeError)) {
+          throw writeError;
         }
 
         await writeLocalDb(next);
+      } else {
+        revalidateTag("sales-db", { expire: 0 });
       }
     } else {
       await writeLocalDb(next);

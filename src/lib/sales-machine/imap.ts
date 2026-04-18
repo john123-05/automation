@@ -48,6 +48,7 @@ export async function listImapInboxMessages(input: {
       pass: input.config.password,
     },
     logger: false,
+    connectionTimeout: 15000,
   });
 
   await client.connect();
