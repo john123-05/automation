@@ -173,9 +173,13 @@ function buildTrialCreditsCard({
 function buildOpenAiCard({
   orgBilling,
   appSpend,
+  claudeSpend,
+  anthropicApiKey,
 }: {
   orgBilling: Awaited<ReturnType<typeof getOpenAiBillingSnapshot>>;
   appSpend: ReturnType<typeof getAppTrackedOpenAiSpend>;
+  claudeSpend: ReturnType<typeof getAppTrackedClaudeSpend>;
+  anthropicApiKey: string | null;
 }): BillingCard {
   const useOrgFallback = !appSpend.lastUpdatedAt && !orgBilling.error;
   const status = orgBilling.error?.includes("OPENAI_ADMIN_KEY")
@@ -220,45 +224,20 @@ function buildOpenAiCard({
             : "Unavailable"
           : formatMoney(useOrgFallback ? orgBilling.last7DaysCost : appSpend.last7DaysCost, metricCurrency),
       },
+      {
+        label: "Claude MTD",
+        value: anthropicApiKey
+          ? formatMoney(claudeSpend.monthToDateCost, claudeSpend.currency)
+          : "Add API key",
+      },
+      {
+        label: "Claude 7 days",
+        value: anthropicApiKey
+          ? formatMoney(claudeSpend.last7DaysCost, claudeSpend.currency)
+          : "Add API key",
+      },
     ],
     lastUpdatedAt: appSpend.lastUpdatedAt ?? orgBilling.lastUpdatedAt,
-    refreshPath: null,
-  };
-}
-
-function buildAnthropicCard({
-  appSpend,
-  anthropicApiKey,
-}: {
-  appSpend: ReturnType<typeof getAppTrackedClaudeSpend>;
-  anthropicApiKey: string | null;
-}): BillingCard {
-  const hasKey = Boolean(anthropicApiKey);
-  const hasData = Boolean(appSpend.lastUpdatedAt);
-
-  return {
-    id: "anthropic",
-    title: "Anthropic",
-    titleSuffix: null,
-    scopeLabel: "App-tracked from Claude enrichment runs.",
-    status: hasKey ? "ready" : "setup-needed",
-    statusLabel: hasKey ? (hasData ? "Live" : "Ready") : "Setup needed",
-    summary: hasKey
-      ? hasData
-        ? "Costs are tracked from contact enrichment runs that used Claude as a fallback provider."
-        : "No Claude enrichment runs yet. Claude will be used automatically when higher-priority providers fail."
-      : "Add ANTHROPIC_API_KEY to enable Claude as a last-resort fallback for contact enrichment.",
-    metrics: [
-      {
-        label: "App MTD",
-        value: hasKey ? formatMoney(appSpend.monthToDateCost, appSpend.currency) : "Add API key",
-      },
-      {
-        label: "App 7 days",
-        value: hasKey ? formatMoney(appSpend.last7DaysCost, appSpend.currency) : "Add API key",
-      },
-    ],
-    lastUpdatedAt: appSpend.lastUpdatedAt,
     refreshPath: null,
   };
 }
@@ -282,9 +261,7 @@ export async function getBillingOverview({
       buildOpenAiCard({
         orgBilling: openAiBilling,
         appSpend: openAiAppSpend,
-      }),
-      buildAnthropicCard({
-        appSpend: claudeAppSpend,
+        claudeSpend: claudeAppSpend,
         anthropicApiKey: env.anthropicApiKey,
       }),
     ],
